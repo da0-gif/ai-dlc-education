@@ -1,11 +1,22 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from app.exceptions import NotFoundError, AuthError, RateLimitError, ConflictError, ValidationError, BusinessError
 from app.routers import auth, store, admin, category, menu, order, table, parking, sse, daily_sales
+from app.database import engine
+from app.models import Base
 
-app = FastAPI(title="Table Order API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+
+
+app = FastAPI(title="Table Order API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
