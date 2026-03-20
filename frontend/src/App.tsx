@@ -18,30 +18,32 @@ function CustomerNav({ cartCount }: { cartCount: number }) {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
+  const glass = { background: 'var(--nav-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)' } as React.CSSProperties;
+
   const navItem = (to: string, label: string, icon: string) => (
-    <Link key={to} to={to} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px', color: isActive(to) ? 'var(--text-primary)' : 'var(--text-muted)', textDecoration: 'none', fontSize: 15, fontWeight: isActive(to) ? 'bold' : 'normal' }}>
-      <span>{icon}</span> {label}
+    <Link key={to} to={to} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, padding: '6px 16px', color: isActive(to) ? 'var(--accent)' : 'var(--text-muted)', textDecoration: 'none', fontSize: 11, fontWeight: isActive(to) ? '600' : '400', transition: 'color 0.2s' }}>
+      <span style={{ fontSize: 22 }}>{icon}</span>{label}
     </Link>
   );
 
   return (
     <>
-      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-header)', padding: '0 16px', height: 56, borderBottom: '1px solid var(--border)' }}>
-        <span style={{ color: 'var(--accent)', fontSize: 22, fontWeight: 'bold' }}>{storeName || 't 오더'}</span>
+      <header style={{ ...glass, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', height: 56, borderBottom: '1px solid var(--glass-border)', position: 'sticky', top: 0, zIndex: 100 }}>
+        <span style={{ color: 'var(--accent)', fontSize: 22, fontWeight: '700', letterSpacing: -0.5 }}>{storeName || '송오더'}</span>
         {auth.tableId && (
-          <div style={{ background: 'var(--accent)', color: '#fff', borderRadius: 8, padding: '4px 12px', textAlign: 'center' }}>
-            <div style={{ fontSize: 10, lineHeight: 1 }}>테이블번호</div>
-            <div style={{ fontSize: 24, fontWeight: 'bold', lineHeight: 1.2 }}>{auth.tableId}</div>
+          <div style={{ background: 'var(--accent)', color: '#fff', borderRadius: 14, padding: '4px 14px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,122,255,0.3)' }}>
+            <div style={{ fontSize: 9, lineHeight: 1, opacity: 0.8, letterSpacing: 0.5 }}>TABLE</div>
+            <div style={{ fontSize: 22, fontWeight: '700', lineHeight: 1.2 }}>{auth.tableId}</div>
           </div>
         )}
       </header>
-      <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 60, background: 'var(--bg-header)', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-around', alignItems: 'center', zIndex: 100 }}>
+      <nav style={{ ...glass, position: 'fixed', bottom: 0, left: 0, right: 0, height: 64, borderTop: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-around', alignItems: 'center', zIndex: 100, paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {navItem('/customer', '메뉴', '🍽️')}
         {navItem('/customer/orders', '주문내역', '📋')}
         {navItem('/customer/parking', '주차등록', '🅿️')}
-        <Link to="/customer/cart" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px', color: isActive('/customer/cart') ? 'var(--text-primary)' : 'var(--text-muted)', textDecoration: 'none', fontSize: 15, fontWeight: isActive('/customer/cart') ? 'bold' : 'normal', position: 'relative' }}>
-          <span>🛒</span> 장바구니
-          {cartCount > 0 && <span style={{ position: 'absolute', top: 4, right: 8, background: 'var(--accent)', color: '#fff', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 'bold' }}>{cartCount}</span>}
+        <Link to="/customer/cart" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '6px 16px', color: isActive('/customer/cart') ? 'var(--accent)' : 'var(--text-muted)', textDecoration: 'none', fontSize: 11, fontWeight: isActive('/customer/cart') ? '600' : '400', position: 'relative', transition: 'color 0.2s' }}>
+          <span style={{ fontSize: 22 }}>🛒</span> 장바구니
+          {cartCount > 0 && <span style={{ position: 'absolute', top: 0, right: 6, background: '#ff3b30', color: '#fff', borderRadius: 10, minWidth: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: '600', padding: '0 4px' }}>{cartCount}</span>}
         </Link>
       </nav>
     </>
@@ -81,7 +83,7 @@ function CustomerLayout() {
   if (!auth.isAuthenticated) return <TableLogin />;
 
   return (
-    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingBottom: 60 }}>
+    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', paddingBottom: 80 }}>
       <CustomerNav cartCount={cart.reduce((s, i) => s + i.quantity, 0)} />
       <Routes>
         <Route index element={<MenuView cart={cart} onAddToCart={addToCart} />} />
@@ -106,7 +108,7 @@ function AdminLayout() {
   return (
     <div style={{ background: 'var(--bg-primary)', minHeight: '100vh' }}>
       <nav style={{ display: 'flex', gap: 0, padding: '0 16px', background: 'var(--bg-header)', borderBottom: '1px solid var(--border)', alignItems: 'center', height: 56 }}>
-        <span style={{ color: 'var(--accent)', fontSize: 20, fontWeight: 'bold', marginRight: 24 }}>t 오더 관리</span>
+        <span style={{ color: 'var(--accent)', fontSize: 20, fontWeight: 'bold', marginRight: 24 }}>송오더 관리</span>
         {[
           { to: '/admin', label: '대시보드' },
           { to: '/admin/menus', label: '메뉴' },

@@ -3,272 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>테이블오더 - 관리자</title>
+<title>송오더 관리 - 가맹주 화면</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f5f5f5; }
-.sidebar { position:fixed; left:0; top:0; width:220px; height:100%; background:#1a237e; color:#fff; padding:20px 0; }
-.sidebar h1 { font-size:16px; padding:0 20px 20px; border-bottom:1px solid rgba(255,255,255,0.1); }
-.sidebar nav { margin-top:12px; }
-.sidebar nav button { display:block; width:100%; padding:14px 20px; border:none; background:none; color:rgba(255,255,255,0.7); font-size:14px; text-align:left; cursor:pointer; }
-.sidebar nav button.active { background:rgba(255,255,255,0.1); color:#fff; border-left:3px solid #64B5F6; }
-.sidebar nav button:hover { background:rgba(255,255,255,0.05); }
-.main { margin-left:220px; padding:24px; }
-.topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
-.topbar h2 { font-size:22px; }
-.topbar .store-info { font-size:13px; color:#757575; }
+:root{--bg-primary:#1a1a2e;--bg-secondary:#16213e;--bg-card:#1e2a4a;--bg-header:#0f1629;--bg-input:#253255;--border:#2a3a5c;--accent:#e94560;--text-primary:#eee;--text-secondary:#aab;--text-muted:#778;--text-dim:#556;--btn-secondary:#253255;--btn-secondary-text:#aab}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-primary);color:var(--text-primary)}
 
-/* Pages */
-.page { display:none; }
-.page.active { display:block; }
+.top-nav{display:flex;gap:0;padding:0 16px;background:var(--bg-header);border-bottom:1px solid var(--border);align-items:center;height:56px}
+.top-nav .logo{color:var(--accent);font-size:20px;font-weight:bold;margin-right:24px}
+.top-nav a{padding:16px 20px;color:var(--text-secondary);text-decoration:none;font-size:15px;cursor:pointer;border-bottom:2px solid transparent}
+.top-nav a.active{color:var(--text-primary);font-weight:bold;border-bottom-color:var(--accent)}
+.top-nav .logout{margin-left:auto;padding:8px 20px;background:var(--btn-secondary);color:var(--btn-secondary-text);border:none;border-radius:6px;font-size:14px;cursor:pointer}
 
-/* Dashboard Grid */
-.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
-.stat-card { background:#fff; border-radius:12px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
-.stat-card .label { font-size:13px; color:#757575; margin-bottom:4px; }
-.stat-card .value { font-size:28px; font-weight:700; }
-.stat-card .value.orange { color:#E65100; }
-.stat-card .value.blue { color:#1565C0; }
-.stat-card .value.green { color:#2E7D32; }
+.tab{display:none;padding:24px;max-width:1000px;margin:0 auto}
+.tab.active{display:block}
 
-.table-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
-.table-card { background:#fff; border-radius:12px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.08); border-left:4px solid #e0e0e0; }
-.table-card.has-order { border-left-color:#1976D2; }
-.table-card.new-order { border-left-color:#FF5722; animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{box-shadow:0 1px 4px rgba(0,0,0,0.08)} 50%{box-shadow:0 2px 16px rgba(255,87,34,0.3)} }
-.table-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.table-num { font-size:16px; font-weight:700; }
-.table-total { font-size:14px; font-weight:600; color:#1976D2; }
-.table-orders { border-top:1px solid #f0f0f0; padding-top:8px; }
-.table-order-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:13px; }
-.table-order-row .status-badge { padding:2px 8px; border-radius:8px; font-size:11px; font-weight:600; }
-.table-actions { display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid #f0f0f0; }
-.table-actions button { flex:1; padding:8px; border:none; border-radius:6px; font-size:12px; cursor:pointer; min-height:36px; }
-.btn-status { background:#E3F2FD; color:#1565C0; }
-.btn-complete { background:#E8F5E9; color:#2E7D32; }
-.btn-history { background:#F3E5F5; color:#7B1FA2; }
+.card{background:var(--bg-card);border-radius:12px;padding:16px;border:1px solid var(--border);margin-bottom:16px}
+.input{padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-primary);font-size:14px;width:100%}
+.textarea{padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-primary);font-size:14px;width:100%;resize:vertical}
+.btn{padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn-sm{padding:6px 12px;border:none;border-radius:4px;cursor:pointer;font-size:13px}
+.btn-edit{background:var(--btn-secondary);color:var(--btn-secondary-text)}
+.btn-del{background:#e74c3c;color:#fff}
+.menu-row{display:flex;justify-content:space-between;align-items:center;padding:14px}
+.placeholder{text-align:center;padding:32px;color:var(--text-muted)}
 
-/* Menu Management */
-.menu-table { width:100%; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
-.menu-table th { background:#f5f5f5; padding:12px 16px; text-align:left; font-size:13px; color:#757575; }
-.menu-table td { padding:12px 16px; border-top:1px solid #f0f0f0; font-size:14px; }
-.menu-table .actions button { padding:6px 12px; border:none; border-radius:4px; font-size:12px; cursor:pointer; margin-right:4px; }
-.btn-edit { background:#FFF3E0; color:#E65100; }
-.btn-delete { background:#FFEBEE; color:#C62828; }
-.btn-add { padding:10px 20px; border:none; border-radius:8px; background:#1976D2; color:#fff; font-size:14px; cursor:pointer; min-height:44px; }
+/* Dashboard */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.table-card{background:var(--bg-card);border-radius:12px;padding:16px;border:1px solid var(--border)}
+.table-card.has-order{border-color:var(--accent);animation:pulse 2s ease-in-out}
+@keyframes pulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px rgba(233,69,96,.3)}}
+.sse-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 
-/* Modal */
-.modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; }
-.modal-overlay.show { display:flex; }
-.modal { background:#fff; border-radius:16px; padding:24px; max-width:500px; width:100%; margin:20px; }
-.modal h3 { margin-bottom:16px; }
-.modal .order-detail { margin-bottom:8px; padding:8px 0; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; font-size:14px; }
-.modal .close-btn { width:100%; padding:12px; border:none; border-radius:8px; background:#f5f5f5; font-size:14px; cursor:pointer; margin-top:16px; }
-
-/* SSE indicator */
-.sse-indicator { display:flex; align-items:center; gap:6px; font-size:12px; color:#4CAF50; }
-.sse-dot { width:8px; height:8px; border-radius:50%; background:#4CAF50; animation:blink 1.5s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+/* Theme */
+.theme-preview{flex:1;max-width:280px;border-radius:16px;overflow:hidden;cursor:pointer;border:3px solid transparent}
+.theme-preview.selected{border-color:var(--accent)}
 </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <h1>🍽️ 테이블오더 관리</h1>
-  <nav>
-    <button class="active" onclick="showAdminPage('dashboardPage',this)">📊 주문 대시보드</button>
-    <button onclick="showAdminPage('menuMgmtPage',this)">📝 메뉴 관리</button>
-    <button onclick="showAdminPage('tableMgmtPage',this)">🪑 테이블 관리</button>
-    <button onclick="showAdminPage('storePage',this)">🏪 매장 관리</button>
-  </nav>
-  <div style="position:absolute;bottom:20px;left:20px;right:20px;">
-    <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:8px;">맛있는 식당 본점</div>
-    <button style="width:100%;padding:10px;border:1px solid rgba(255,255,255,0.2);border-radius:6px;background:none;color:rgba(255,255,255,0.7);font-size:13px;cursor:pointer;">로그아웃</button>
+<nav class="top-nav">
+  <span class="logo">송오더 관리</span>
+  <a class="active" onclick="showTab('dashboard',this)">대시보드</a>
+  <a onclick="showTab('menus',this)">메뉴</a>
+  <a onclick="showTab('tables',this)">테이블</a>
+  <a onclick="showTab('stores',this)">매장</a>
+  <a onclick="showTab('theme',this)">테마</a>
+  <button class="logout" onclick="alert('로그아웃')">로그아웃</button>
+</nav>
+
+<!-- 대시보드 -->
+<div id="tabDashboard" class="tab active">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <h2>주문 대시보드</h2>
+    <span style="display:flex;align-items:center;gap:6px;font-size:14px;color:#4CAF50"><span class="sse-dot" style="background:#4CAF50"></span>실시간 연결됨</span>
   </div>
+  <div class="dash-grid" id="dashGrid"></div>
 </div>
 
-<div class="main">
-  <!-- Dashboard Page -->
-  <div class="page active" id="dashboardPage">
-    <div class="topbar">
-      <div>
-        <h2>주문 대시보드</h2>
-        <div class="store-info">맛있는 식당 본점 · 2026-03-20</div>
-      </div>
-      <div class="sse-indicator"><div class="sse-dot"></div>실시간 연결됨</div>
+<!-- 메뉴 관리 -->
+<div id="tabMenus" class="tab">
+  <h2 style="margin-bottom:16px">메뉴 관리</h2>
+  <div class="card" style="display:flex;gap:8px;align-items:center">
+    <input class="input" style="flex:1" placeholder="새 카테고리명" id="newCatInput">
+    <button class="btn" onclick="addCat()">추가</button>
+  </div>
+  <div class="card" style="display:flex;flex-direction:column;gap:10px" id="menuForm">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <input class="input" placeholder="메뉴명" id="mName">
+      <input class="input" placeholder="가격" type="number" id="mPrice">
     </div>
-    <div class="stats">
-      <div class="stat-card"><div class="label">대기중</div><div class="value orange">5</div></div>
-      <div class="stat-card"><div class="label">준비중</div><div class="value blue">3</div></div>
-      <div class="stat-card"><div class="label">완료</div><div class="value green">12</div></div>
-      <div class="stat-card"><div class="label">오늘 매출</div><div class="value">₩847,000</div></div>
-    </div>
-    <div class="table-grid">
-      <div class="table-card new-order" onclick="showDetailModal()">
-        <div class="table-header">
-          <span class="table-num">🪑 테이블 1</span>
-          <span class="table-total">₩73,000</span>
-        </div>
-        <div class="table-orders">
-          <div class="table-order-row"><span>#1042 숯불갈비x2, 된장찌개x1</span><span class="status-badge" style="background:#FFF3E0;color:#E65100;">대기중</span></div>
-        </div>
-        <div class="table-actions">
-          <button class="btn-status">상태변경</button>
-          <button class="btn-complete">이용완료</button>
-          <button class="btn-history">과거내역</button>
-        </div>
-      </div>
-      <div class="table-card has-order">
-        <div class="table-header">
-          <span class="table-num">🪑 테이블 2</span>
-          <span class="table-total">₩45,000</span>
-        </div>
-        <div class="table-orders">
-          <div class="table-order-row"><span>#1040 냉면x2, 콜라x1</span><span class="status-badge" style="background:#E3F2FD;color:#1565C0;">준비중</span></div>
-          <div class="table-order-row"><span>#1041 공기밥x2</span><span class="status-badge" style="background:#E8F5E9;color:#2E7D32;">완료</span></div>
-        </div>
-        <div class="table-actions">
-          <button class="btn-status">상태변경</button>
-          <button class="btn-complete">이용완료</button>
-          <button class="btn-history">과거내역</button>
-        </div>
-      </div>
-      <div class="table-card has-order">
-        <div class="table-header">
-          <span class="table-num">🪑 테이블 3</span>
-          <span class="table-total">₩79,000</span>
-        </div>
-        <div class="table-orders">
-          <div class="table-order-row"><span>#1043 숯불갈비x2, 콜라x2</span><span class="status-badge" style="background:#E3F2FD;color:#1565C0;">준비중</span></div>
-        </div>
-        <div class="table-actions">
-          <button class="btn-status">상태변경</button>
-          <button class="btn-complete">이용완료</button>
-          <button class="btn-history">과거내역</button>
-        </div>
-      </div>
-      <div class="table-card">
-        <div class="table-header">
-          <span class="table-num">🪑 테이블 4</span>
-          <span class="table-total">₩0</span>
-        </div>
-        <div class="table-orders" style="color:#bdbdbd;font-size:13px;padding:12px 0;text-align:center;">주문 없음</div>
-        <div class="table-actions">
-          <button class="btn-history">과거내역</button>
-        </div>
-      </div>
-      <div class="table-card has-order">
-        <div class="table-header">
-          <span class="table-num">🪑 테이블 5</span>
-          <span class="table-total">₩32,000</span>
-        </div>
-        <div class="table-orders">
-          <div class="table-order-row"><span>#1039 숯불갈비x1</span><span class="status-badge" style="background:#E8F5E9;color:#2E7D32;">완료</span></div>
-        </div>
-        <div class="table-actions">
-          <button class="btn-status">상태변경</button>
-          <button class="btn-complete">이용완료</button>
-          <button class="btn-history">과거내역</button>
-        </div>
-      </div>
-      <div class="table-card">
-        <div class="table-header">
-          <span class="table-num">🪑 테이블 6</span>
-          <span class="table-total">₩0</span>
-        </div>
-        <div class="table-orders" style="color:#bdbdbd;font-size:13px;padding:12px 0;text-align:center;">주문 없음</div>
-        <div class="table-actions">
-          <button class="btn-history">과거내역</button>
-        </div>
-      </div>
+    <select class="input" id="mCat"></select>
+    <textarea class="textarea" placeholder="메뉴 설명 (선택사항)" rows="2" id="mDesc"></textarea>
+    <input type="file" accept="image/*" style="font-size:14px;color:var(--text-secondary)" id="mImage">
+    <div style="display:flex;gap:8px">
+      <button class="btn" style="flex:1;padding:10px 0;font-size:15px" id="mSubmit" onclick="submitMenu()">등록</button>
+      <button class="btn-sm btn-edit" style="display:none;padding:10px 16px" id="mCancel" onclick="cancelEdit()">취소</button>
     </div>
   </div>
-
-  <!-- Menu Management Page -->
-  <div class="page" id="menuMgmtPage">
-    <div class="topbar">
-      <h2>메뉴 관리</h2>
-      <button class="btn-add">+ 메뉴 추가</button>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:16px;">
-      <button style="padding:8px 16px;border:none;border-radius:16px;background:#1976D2;color:#fff;font-size:13px;cursor:pointer;">전체</button>
-      <button style="padding:8px 16px;border:none;border-radius:16px;background:#e0e0e0;font-size:13px;cursor:pointer;">추천메뉴</button>
-      <button style="padding:8px 16px;border:none;border-radius:16px;background:#e0e0e0;font-size:13px;cursor:pointer;">메인요리</button>
-      <button style="padding:8px 16px;border:none;border-radius:16px;background:#e0e0e0;font-size:13px;cursor:pointer;">사이드</button>
-      <button style="padding:8px 16px;border:none;border-radius:16px;background:#e0e0e0;font-size:13px;cursor:pointer;">음료</button>
-    </div>
-    <table class="menu-table">
-      <thead><tr><th>순서</th><th>메뉴명</th><th>카테고리</th><th>가격</th><th>설명</th><th>관리</th></tr></thead>
-      <tbody>
-        <tr><td>1</td><td>🍖 숯불 갈비</td><td>메인요리</td><td>₩32,000</td><td>국내산 한우 갈비를 숯불에 구워낸...</td><td class="actions"><button class="btn-edit">수정</button><button class="btn-delete">삭제</button></td></tr>
-        <tr><td>2</td><td>🥘 된장찌개</td><td>메인요리</td><td>₩9,000</td><td>전통 방식으로 끓인 구수한...</td><td class="actions"><button class="btn-edit">수정</button><button class="btn-delete">삭제</button></td></tr>
-        <tr><td>3</td><td>🍜 냉면</td><td>메인요리</td><td>₩11,000</td><td>시원한 육수에 쫄깃한 면발의...</td><td class="actions"><button class="btn-edit">수정</button><button class="btn-delete">삭제</button></td></tr>
-        <tr><td>4</td><td>🥤 콜라</td><td>음료</td><td>₩3,000</td><td>시원한 탄산음료</td><td class="actions"><button class="btn-edit">수정</button><button class="btn-delete">삭제</button></td></tr>
-        <tr><td>5</td><td>🍚 공기밥</td><td>사이드</td><td>₩1,000</td><td>갓 지은 따뜻한 쌀밥</td><td class="actions"><button class="btn-edit">수정</button><button class="btn-delete">삭제</button></td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Table Management Page -->
-  <div class="page" id="tableMgmtPage">
-    <div class="topbar">
-      <h2>테이블 관리</h2>
-      <button class="btn-add">+ 테이블 추가</button>
-    </div>
-    <table class="menu-table">
-      <thead><tr><th>테이블 번호</th><th>상태</th><th>현재 세션</th><th>총 주문액</th><th>관리</th></tr></thead>
-      <tbody>
-        <tr><td>테이블 1</td><td><span style="color:#E65100;">● 이용중</span></td><td>세션 #A1F3</td><td>₩73,000</td><td class="actions"><button class="btn-edit">설정</button><button class="btn-complete" style="padding:6px 12px;border:none;border-radius:4px;font-size:12px;cursor:pointer;">이용완료</button></td></tr>
-        <tr><td>테이블 2</td><td><span style="color:#1565C0;">● 이용중</span></td><td>세션 #B2E4</td><td>₩45,000</td><td class="actions"><button class="btn-edit">설정</button><button class="btn-complete" style="padding:6px 12px;border:none;border-radius:4px;font-size:12px;cursor:pointer;">이용완료</button></td></tr>
-        <tr><td>테이블 3</td><td><span style="color:#1565C0;">● 이용중</span></td><td>세션 #C3D5</td><td>₩79,000</td><td class="actions"><button class="btn-edit">설정</button><button class="btn-complete" style="padding:6px 12px;border:none;border-radius:4px;font-size:12px;cursor:pointer;">이용완료</button></td></tr>
-        <tr><td>테이블 4</td><td><span style="color:#4CAF50;">● 비어있음</span></td><td>-</td><td>₩0</td><td class="actions"><button class="btn-edit">설정</button></td></tr>
-        <tr><td>테이블 5</td><td><span style="color:#1565C0;">● 이용중</span></td><td>세션 #E5F7</td><td>₩32,000</td><td class="actions"><button class="btn-edit">설정</button><button class="btn-complete" style="padding:6px 12px;border:none;border-radius:4px;font-size:12px;cursor:pointer;">이용완료</button></td></tr>
-        <tr><td>테이블 6</td><td><span style="color:#4CAF50;">● 비어있음</span></td><td>-</td><td>₩0</td><td class="actions"><button class="btn-edit">설정</button></td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Store Management Page -->
-  <div class="page" id="storePage">
-    <div class="topbar">
-      <h2>매장 관리</h2>
-      <button class="btn-add">+ 매장 추가</button>
-    </div>
-    <table class="menu-table">
-      <thead><tr><th>매장명</th><th>매장 식별자</th><th>테이블 수</th><th>상태</th><th>관리</th></tr></thead>
-      <tbody>
-        <tr><td>맛있는 식당 본점</td><td>store-001</td><td>30</td><td><span style="color:#4CAF50;">● 운영중</span></td><td class="actions"><button class="btn-edit">수정</button></td></tr>
-        <tr><td>맛있는 식당 강남점</td><td>store-002</td><td>20</td><td><span style="color:#4CAF50;">● 운영중</span></td><td class="actions"><button class="btn-edit">수정</button></td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div id="menuList"></div>
 </div>
 
-<!-- Order Detail Modal -->
-<div class="modal-overlay" id="detailModal">
-  <div class="modal">
-    <h3>🪑 테이블 1 - 주문 상세</h3>
-    <div style="margin:12px 0;font-size:13px;color:#757575;">주문 #1042 · 11:32 · <span style="color:#E65100;font-weight:600;">대기중</span></div>
-    <div class="order-detail"><span>숯불 갈비 x2</span><span>₩64,000</span></div>
-    <div class="order-detail"><span>된장찌개 x1</span><span>₩9,000</span></div>
-    <div class="order-detail" style="font-weight:700;border-bottom:none;"><span>합계</span><span>₩73,000</span></div>
-    <div style="display:flex;gap:8px;margin-top:16px;">
-      <button style="flex:1;padding:12px;border:none;border-radius:8px;background:#E3F2FD;color:#1565C0;font-size:14px;cursor:pointer;">준비중으로 변경</button>
-      <button style="flex:1;padding:12px;border:none;border-radius:8px;background:#FFEBEE;color:#C62828;font-size:14px;cursor:pointer;">주문 삭제</button>
-    </div>
-    <button class="close-btn" onclick="closeDetailModal()">닫기</button>
+<!-- 테이블 관리 -->
+<div id="tabTables" class="tab">
+  <h2 style="margin-bottom:16px">테이블 관리</h2>
+  <div class="card" style="display:flex;gap:8px;align-items:center">
+    <input class="input" style="flex:1" placeholder="테이블 번호" type="number" id="tNum">
+    <input class="input" style="flex:1" placeholder="비밀번호" type="password" id="tPw">
+    <button class="btn" onclick="addTable()">추가</button>
   </div>
+  <div id="tableList"></div>
+</div>
+
+<!-- 매장 관리 -->
+<div id="tabStores" class="tab">
+  <h2 style="margin-bottom:16px">매장 관리</h2>
+  <div class="card" style="display:flex;flex-direction:column;gap:10px">
+    <input class="input" placeholder="매장명" id="sName">
+    <input class="input" placeholder="매장 식별자 (slug)" id="sSlug">
+    <input class="input" placeholder="주소 (선택)" id="sAddr">
+    <input class="input" placeholder="전화번호 (선택)" id="sPhone">
+    <button class="btn" style="padding:10px 0;font-size:15px" onclick="addStore()">매장 등록</button>
+  </div>
+  <div id="storeList"></div>
+</div>
+
+<!-- 테마 설정 -->
+<div id="tabTheme" class="tab">
+  <h2 style="margin-bottom:20px">테마 설정</h2>
+  <div style="display:flex;gap:20px" id="themeArea"></div>
+  <p style="color:var(--text-muted);margin-top:16px;font-size:14px">선택한 테마는 매장의 모든 테이블 고객 화면에 동일하게 적용됩니다.</p>
 </div>
 
 <script>
-function showAdminPage(id, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sidebar nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if(btn) btn.classList.add('active');
+// Data
+const categories=[{id:'c1',name:'추천메뉴'},{id:'c2',name:'메인요리'},{id:'c3',name:'사이드'},{id:'c4',name:'음료'}];
+const menus=[
+  {id:'m1',name:'숯불갈비',price:28000,description:'국내산 한우 갈비를 참숯에 구워 깊은 풍미를 살린 시그니처 메뉴입니다.',image_url:'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop',is_sold_out:false,category_id:'c1'},
+  {id:'m2',name:'해물파전',price:18000,description:'신선한 해물과 쪽파를 넣어 바삭하게 부친 전통 파전입니다.',image_url:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop',is_sold_out:false,category_id:'c1'},
+  {id:'m3',name:'된장찌개',price:12000,description:'직접 담근 된장으로 끓인 구수한 찌개.',image_url:'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=300&fit=crop',is_sold_out:false,category_id:'c2'},
+  {id:'m4',name:'김치볶음밥',price:11000,description:'묵은지와 삼겹살을 넣어 불맛 가득한 볶음밥.',image_url:'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=300&fit=crop',is_sold_out:false,category_id:'c2'},
+  {id:'m5',name:'잡채',price:15000,description:'당면과 각종 채소를 참기름에 볶아낸 잡채.',image_url:'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&h=300&fit=crop',is_sold_out:true,category_id:'c2'},
+  {id:'m6',name:'계란말이',price:9000,description:null,image_url:'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&h=300&fit=crop',is_sold_out:false,category_id:'c3'},
+  {id:'m7',name:'콜라',price:3000,description:'시원한 코카콜라 500ml',image_url:'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&h=300&fit=crop',is_sold_out:false,category_id:'c4'},
+  {id:'m8',name:'생맥주',price:5000,description:'시원한 생맥주 500ml.',image_url:'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=300&fit=crop',is_sold_out:false,category_id:'c4'},
+  {id:'m9',name:'소주',price:5000,description:'참이슬 오리지널 360ml',image_url:'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400&h=300&fit=crop',is_sold_out:false,category_id:'c4'},
+];
+const tables=[{id:'t1',number:1,orders:[],total:0},{id:'t2',number:2,orders:[{name:'숯불갈비 x1, 생맥주 x2',amount:38000,status:'PREPARING'}],total:38000},{id:'t3',number:3,orders:[],total:0},{id:'t4',number:4,orders:[{name:'된장찌개 x2, 소주 x1',amount:29000,status:'PENDING'}],total:29000},{id:'t5',number:5,orders:[{name:'해물파전 x1, 콜라 x2',amount:24000,status:'COMPLETED'},{name:'김치볶음밥 x1',amount:11000,status:'PREPARING'}],total:35000},{id:'t6',number:6,orders:[],total:0}];
+const stores=[{name:'강남점',slug:'gangnam',addr:'서울시 강남구',phone:'02-1234-5678'}];
+let editId=null;
+let currentTheme='dark';
+
+function showTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)).classList.add('active');
+  document.querySelectorAll('.top-nav a').forEach(a=>a.classList.remove('active'));
+  if(el)el.classList.add('active');
 }
-function showDetailModal() { document.getElementById('detailModal').classList.add('show'); }
-function closeDetailModal() { document.getElementById('detailModal').classList.remove('show'); }
+
+// Dashboard
+function renderDash(){
+  const statusCfg={PENDING:{label:'대기중',bg:'#757575'},PREPARING:{label:'준비중',bg:'#FF9800'},COMPLETED:{label:'완료',bg:'#4CAF50'}};
+  document.getElementById('dashGrid').innerHTML=tables.map(t=>{
+    const hasOrder=t.orders.length>0;
+    return`<div class="table-card ${hasOrder?'has-order':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:20px;font-weight:bold">테이블 ${t.number}</span>
+        <span style="font-size:18px;font-weight:bold;color:${hasOrder?'var(--accent)':'var(--text-dim)'}">${t.total.toLocaleString()}원</span>
+      </div>
+      ${t.orders.length?t.orders.map(o=>{const sc=statusCfg[o.status];return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--border)">
+        <span style="color:var(--text-secondary);font-size:13px">${o.name}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:13px;color:var(--text-secondary)">${o.amount.toLocaleString()}원</span>
+          <span style="padding:2px 8px;border-radius:12px;background:${sc.bg};color:#fff;font-size:11px">${sc.label}</span>
+        </div>
+      </div>`;}).join(''):'<div style="color:var(--text-dim);font-size:14px;padding:8px 0">주문 없음</div>'}
+      <div style="display:flex;gap:6px;margin-top:12px">
+        ${hasOrder?`<button class="btn-sm btn-del" onclick="alert('주문 삭제')">주문삭제</button><button class="btn-sm btn-edit" onclick="alert('이용 완료 처리')">이용완료</button>`:''}
+        <button class="btn-sm btn-edit" onclick="alert('과거 내역 조회')">과거내역</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Menu management
+function renderMenuAdmin(){
+  document.getElementById('mCat').innerHTML='<option value="">카테고리 선택</option>'+categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('menuList').innerHTML=menus.map(m=>`<div class="card menu-row">
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:10px">
+        ${m.image_url?`<img src="${m.image_url}" style="width:48px;height:48px;border-radius:6px;object-fit:cover">`:''}
+        <div>
+          <div style="font-weight:bold">${m.name} <span style="font-weight:normal;color:var(--text-muted);font-size:13px">(${categories.find(c=>c.id===m.category_id)?.name||''})</span>
+            ${m.is_sold_out?'<span style="color:var(--accent);font-size:11px;margin-left:4px">품절</span>':''}
+          </div>
+          <div style="color:var(--text-secondary);font-size:14px">${m.price.toLocaleString()}원</div>
+          ${m.description?`<div style="color:var(--text-muted);font-size:12px;margin-top:2px">${m.description}</div>`:'<div style="color:var(--text-dim);font-size:12px;margin-top:2px;font-style:italic">설명 없음</div>'}
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-shrink:0">
+      <button class="btn-sm btn-edit" onclick="startEdit('${m.id}')">수정</button>
+      <button class="btn-sm btn-del" onclick="deleteMenu('${m.id}')">삭제</button>
+    </div>
+  </div>`).join('')||'<div class="card placeholder">등록된 메뉴가 없습니다.</div>';
+}
+
+function addCat(){const v=document.getElementById('newCatInput').value.trim();if(!v)return;categories.push({id:'c'+Date.now(),name:v});document.getElementById('newCatInput').value='';renderMenuAdmin();}
+function startEdit(id){const m=menus.find(x=>x.id===id);editId=id;document.getElementById('mName').value=m.name;document.getElementById('mPrice').value=m.price;document.getElementById('mDesc').value=m.description||'';document.getElementById('mCat').value=m.category_id;document.getElementById('mSubmit').textContent='수정';document.getElementById('mCancel').style.display='block';}
+function cancelEdit(){editId=null;document.getElementById('mName').value='';document.getElementById('mPrice').value='';document.getElementById('mDesc').value='';document.getElementById('mCat').value='';document.getElementById('mSubmit').textContent='등록';document.getElementById('mCancel').style.display='none';}
+function submitMenu(){
+  const name=document.getElementById('mName').value.trim(),price=parseInt(document.getElementById('mPrice').value),desc=document.getElementById('mDesc').value.trim()||null,catId=document.getElementById('mCat').value;
+  if(!name||!price)return;
+  if(editId){const m=menus.find(x=>x.id===editId);m.name=name;m.price=price;m.description=desc;if(catId)m.category_id=catId;}
+  else{if(!catId)return;menus.push({id:'m'+Date.now(),name,price,description:desc,image_url:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop',is_sold_out:false,category_id:catId});}
+  cancelEdit();renderMenuAdmin();
+}
+function deleteMenu(id){const i=menus.findIndex(m=>m.id===id);if(i>=0)menus.splice(i,1);renderMenuAdmin();}
+
+// Tables
+function renderTables(){
+  document.getElementById('tableList').innerHTML=tables.map(t=>`<div class="card menu-row">
+    <div><span style="font-weight:bold;font-size:16px">테이블 ${t.number}</span><span style="color:var(--text-muted);font-size:13px;margin-left:8px">${t.orders.length}건 주문 · ${t.total.toLocaleString()}원</span></div>
+    <div style="display:flex;gap:6px">
+      <button class="btn-sm btn-edit" onclick="alert('이용 완료 처리')">이용완료</button>
+      <button class="btn-sm btn-del" onclick="alert('테이블 삭제')">삭제</button>
+    </div>
+  </div>`).join('');
+}
+function addTable(){const n=parseInt(document.getElementById('tNum').value),p=document.getElementById('tPw').value;if(!n||!p)return;tables.push({id:'t'+Date.now(),number:n,orders:[],total:0});document.getElementById('tNum').value='';document.getElementById('tPw').value='';renderTables();renderDash();}
+
+// Stores
+function renderStores(){
+  document.getElementById('storeList').innerHTML=stores.map((s,i)=>`<div class="card menu-row">
+    <div><div style="font-weight:bold">${s.name} <span style="font-weight:normal;color:var(--text-muted);font-size:13px">(${s.slug})</span></div>
+    <div style="color:var(--text-secondary);font-size:13px">${s.addr||''} ${s.phone?'· '+s.phone:''}</div></div>
+    <button class="btn-sm btn-edit" onclick="alert('매장 수정')">수정</button>
+  </div>`).join('');
+}
+function addStore(){const n=document.getElementById('sName').value.trim(),sl=document.getElementById('sSlug').value.trim();if(!n||!sl)return;stores.push({name:n,slug:sl,addr:document.getElementById('sAddr').value.trim(),phone:document.getElementById('sPhone').value.trim()});['sName','sSlug','sAddr','sPhone'].forEach(id=>document.getElementById(id).value='');renderStores();}
+
+// Theme
+function renderTheme(){
+  const modes=[{key:'dark',label:'다크 모드',bg:'#1a1a1a',header:'#111',card:'#2a2a2a',sidebar:'#2a2a2a',item:'#333',accent:'#e53935',border:'none',textColor:'#ccc'},
+    {key:'light',label:'라이트 모드',bg:'#f5f5f5',header:'#fff',card:'#fff',sidebar:'#fff',item:'#e0e0e0',accent:'#d32f2f',border:'1px solid #e0e0e0',textColor:'#424242'}];
+  document.getElementById('themeArea').innerHTML=modes.map(m=>`<div class="theme-preview ${currentTheme===m.key?'selected':''}" onclick="currentTheme='${m.key}';renderTheme();" style="background:${m.bg}">
+    <div style="padding:16px">
+      <div style="background:${m.header};border-radius:8px;padding:8px;margin-bottom:8px;border:${m.border}">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="color:${m.accent};font-weight:bold;font-size:14px">송오더</span>
+          <div style="background:${m.accent};color:#fff;border-radius:4px;padding:2px 6px;font-size:10px">12</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <div style="width:40px;background:${m.sidebar};border-radius:4px;padding:4px;border:${m.border}">
+          <div style="background:${m.accent};border-radius:2px;height:12px;margin-bottom:4px"></div>
+          <div style="background:${m.item};border-radius:2px;height:12px;margin-bottom:4px"></div>
+          <div style="background:${m.item};border-radius:2px;height:12px"></div>
+        </div>
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:4px">
+          <div style="background:${m.card};border-radius:4px;height:50px;border:${m.border}"></div>
+          <div style="background:${m.card};border-radius:4px;height:50px;border:${m.border}"></div>
+          <div style="background:${m.card};border-radius:4px;height:50px;border:${m.border}"></div>
+          <div style="background:${m.card};border-radius:4px;height:50px;border:${m.border}"></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:12px 16px;background:${currentTheme===m.key?m.accent:m.item};text-align:center">
+      <span style="color:${currentTheme===m.key?'#fff':m.textColor};font-weight:bold;font-size:15px">${currentTheme===m.key?'✓ ':''}${m.label}</span>
+    </div>
+  </div>`).join('');
+}
+
+// Init
+renderDash();renderMenuAdmin();renderTables();renderStores();renderTheme();
 </script>
 </body>
 </html>

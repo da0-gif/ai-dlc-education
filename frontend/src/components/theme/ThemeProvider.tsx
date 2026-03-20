@@ -10,21 +10,28 @@ const ThemeContext = createContext<{ theme: Theme; storeName: string; setTheme: 
 export const useTheme = () => useContext(ThemeContext);
 
 const darkVars: Record<string, string> = {
-  '--bg-primary': '#1a1a1a', '--bg-secondary': '#222', '--bg-card': '#2a2a2a', '--bg-header': '#111',
-  '--bg-input': '#333', '--border': '#333', '--border-input': '#555',
-  '--text-primary': '#fff', '--text-secondary': '#ccc', '--text-muted': '#888', '--text-dim': '#666',
-  '--accent': '#e53935', '--accent-hover': '#c62828',
-  '--btn-secondary': '#444', '--btn-secondary-text': '#ccc',
-  '--scrollbar-track': '#222', '--scrollbar-thumb': '#555',
+  '--bg-primary': '#0a0a0c', '--bg-secondary': '#111114', '--bg-card': 'rgba(255,255,255,0.06)', '--bg-header': 'rgba(255,255,255,0.04)',
+  '--bg-input': 'rgba(255,255,255,0.08)', '--border': 'rgba(255,255,255,0.1)', '--border-input': 'rgba(255,255,255,0.15)',
+  '--text-primary': 'rgba(255,255,255,0.95)', '--text-secondary': 'rgba(255,255,255,0.7)', '--text-muted': 'rgba(255,255,255,0.4)', '--text-dim': 'rgba(255,255,255,0.25)',
+  '--accent': '#0a84ff', '--accent-hover': '#409cff',
+  '--btn-secondary': 'rgba(255,255,255,0.1)', '--btn-secondary-text': 'rgba(255,255,255,0.7)',
+  '--scrollbar-track': 'rgba(255,255,255,0.03)', '--scrollbar-thumb': 'rgba(255,255,255,0.15)',
+  '--glass-bg': 'rgba(255,255,255,0.06)', '--glass-border': 'rgba(255,255,255,0.12)',
+  '--glass-shadow': '0 8px 32px rgba(0,0,0,0.4)', '--glass-blur': 'blur(40px) saturate(180%)',
+  '--glass-highlight': 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 50%)',
+  '--nav-bg': 'rgba(20,20,24,0.72)',
 };
 
 const lightVars: Record<string, string> = {
-  '--bg-primary': '#f5f5f5', '--bg-secondary': '#fff', '--bg-card': '#fff', '--bg-header': '#fff',
-  '--bg-input': '#f0f0f0', '--border': '#e0e0e0', '--border-input': '#ccc',
-  '--text-primary': '#212121', '--text-secondary': '#424242', '--text-muted': '#757575', '--text-dim': '#9e9e9e',
-  '--accent': '#d32f2f', '--accent-hover': '#b71c1c',
-  '--btn-secondary': '#e0e0e0', '--btn-secondary-text': '#424242',
-  '--scrollbar-track': '#f0f0f0', '--scrollbar-thumb': '#bbb',
+  '--bg-primary': '#f2f2f7', '--bg-secondary': '#ffffff', '--bg-card': 'rgba(255,255,255,0.6)', '--bg-header': 'rgba(255,255,255,0.6)',
+  '--bg-input': 'rgba(120,120,128,0.08)', '--border': 'rgba(0,0,0,0.06)', '--border-input': 'rgba(0,0,0,0.1)',
+  '--text-primary': 'rgba(0,0,0,0.88)', '--text-secondary': 'rgba(0,0,0,0.6)', '--text-muted': 'rgba(0,0,0,0.35)', '--text-dim': 'rgba(0,0,0,0.2)',
+  '--accent': '#007aff', '--accent-hover': '#0056cc',
+  '--btn-secondary': 'rgba(0,0,0,0.05)', '--btn-secondary-text': 'rgba(0,0,0,0.6)',
+  '--scrollbar-track': 'rgba(0,0,0,0.03)', '--scrollbar-thumb': 'rgba(0,0,0,0.15)',
+  '--glass-bg': 'rgba(255,255,255,0.55)', '--glass-border': 'rgba(255,255,255,0.7)',
+  '--glass-shadow': '0 8px 32px rgba(0,0,0,0.08)', '--glass-highlight': 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 50%)',
+  '--nav-bg': 'rgba(249,249,249,0.72)',
 };
 
 function applyVars(vars: Record<string, string>) {

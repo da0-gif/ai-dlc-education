@@ -33,7 +33,7 @@ export function ThemeSettings() {
         <div style={{ padding: 16 }}>
           <div style={{ background: headerBg, borderRadius: 8, padding: 8, marginBottom: 8, border: borderStyle }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: accent, fontWeight: 'bold', fontSize: 14 }}>t 오더</span>
+              <span style={{ color: accent, fontWeight: 'bold', fontSize: 14 }}>송오더</span>
               <div style={{ background: accent, color: '#fff', borderRadius: 4, padding: '2px 6px', fontSize: 10 }}>12</div>
             </div>
           </div>
