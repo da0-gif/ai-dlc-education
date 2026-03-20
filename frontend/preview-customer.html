@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>t 오더 - 고객 화면</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif; background: #f2f2f7; color: #1c1c1e; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+
+  /* iOS Liquid Glass tokens */
+  :root {
+    --glass: rgba(255,255,255,0.72);
+    --glass-border: rgba(255,255,255,0.45);
+    --glass-shadow: 0 2px 20px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(0,0,0,0.05);
+    --blur: saturate(180%) blur(20px);
+    --radius: 16px;
+    --radius-lg: 22px;
+    --accent: #007aff;
+    --accent-light: rgba(0,122,255,0.12);
+    --red: #ff3b30;
+    --green: #34c759;
+    --orange: #ff9500;
+    --gray1: #8e8e93;
+    --gray2: #aeaeb2;
+    --gray3: #c7c7cc;
+    --gray4: #d1d1d6;
+    --gray5: #e5e5ea;
+    --gray6: #f2f2f7;
+    --separator: rgba(60,60,67,0.1);
+    --label: #1c1c1e;
+    --label2: #3c3c43;
+    --label3: #8e8e93;
+  }
+
+  .glass { background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
+
+  header { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 56px; border-bottom: 0.5px solid var(--separator); border-radius: 0 0 var(--radius) var(--radius); }
+  header .logo { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+  .table-badge { background: var(--accent); color: #fff; border-radius: 12px; padding: 4px 14px; text-align: center; }
+  .table-badge .lbl { font-size: 9px; opacity: 0.8; line-height: 1; }
+  .table-badge .num { font-size: 20px; font-weight: 800; line-height: 1.2; }
+
+  .tab-bar { display: flex; margin: 12px 16px 0; border-radius: 12px; overflow: hidden; padding: 3px; }
+  .tab-bar button { flex: 1; padding: 10px 0; border: none; background: transparent; font-size: 14px; font-weight: 600; color: var(--gray1); border-radius: 10px; transition: all 0.25s ease; }
+  .tab-bar button.active { background: #fff; color: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* 메뉴 */
+  .menu-layout { display: flex; height: calc(100vh - 56px - 56px); overflow: hidden; }
+  .sidebar { width: 100px; flex-shrink: 0; overflow-y: auto; padding: 12px 8px; }
+  .sidebar button { width: 100%; padding: 12px 6px; border: none; background: transparent; font-size: 14px; font-weight: 600; color: var(--label2); border-radius: 12px; margin-bottom: 4px; transition: all 0.2s; }
+  .sidebar button.active { background: var(--accent); color: #fff; }
+  .menu-main { flex: 1; overflow-y: auto; padding: 16px; }
+  .menu-main h2 { font-size: 26px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .menu-main .count { color: var(--gray1); font-size: 15px; margin-bottom: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .menu-card { border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+  .menu-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+  .menu-card .img { position: relative; width: 100%; padding-top: 80%; background: var(--gray5); }
+  .menu-card .img .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+  .menu-card .img .sold { position: absolute; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; }
+  .menu-card .img .sold span { color: var(--red); font-size: 16px; font-weight: 800; border: 2.5px solid var(--red); padding: 4px 14px; border-radius: 8px; transform: rotate(-12deg); }
+  .menu-card .img .qty-badge { position: absolute; top: 8px; right: 8px; background: var(--accent); color: #fff; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+  .menu-card .info { padding: 10px 12px 14px; }
+  .menu-card .info .name { font-size: 15px; font-weight: 600; color: var(--label); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .menu-card .info .desc { font-size: 12px; color: var(--gray1); margin-bottom: 4px; }
+  .menu-card .info .price { font-size: 17px; font-weight: 700; color: var(--label); }
+
+  /* 장바구니 */
+  .cart-page { padding: 20px 16px; min-height: calc(100vh - 56px - 56px); }
+  .cart-page h2 { font-size: 26px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.5px; }
+  .cart-list { border-radius: var(--radius); overflow: hidden; }
+  .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 0.5px solid var(--separator); }
+  .cart-item:last-child { border-bottom: none; }
+  .cart-item .name { font-size: 16px; font-weight: 600; }
+  .cart-item .unit { font-size: 13px; color: var(--gray1); margin-top: 2px; }
+  .cart-controls { display: flex; align-items: center; gap: 6px; }
+  .qty-btn { width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--gray5); color: var(--label); font-size: 18px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+  .qty { font-size: 17px; font-weight: 600; min-width: 28px; text-align: center; }
+  .subtotal { font-size: 15px; font-weight: 600; min-width: 76px; text-align: right; }
+  .rm-btn { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(255,59,48,0.12); color: var(--red); font-size: 14px; font-weight: 700; }
+  .cart-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+  .clear-btn { padding: 12px 20px; background: var(--gray5); color: var(--label2); border: none; border-radius: 12px; font-size: 15px; font-weight: 600; }
+  .total { font-size: 22px; font-weight: 700; }
+  .order-btn { width: 100%; margin-top: 14px; padding: 18px; background: var(--accent); color: #fff; border: none; border-radius: 14px; font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+
+  /* 주문내역 */
+  .order-page { padding: 20px 16px; min-height: calc(100vh - 56px - 56px); }
+  .order-page h2 { font-size: 26px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.5px; }
+  .order-card { border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .order-num { font-size: 16px; font-weight: 700; }
+  .status { padding: 4px 12px; border-radius: 20px; color: #fff; font-size: 12px; font-weight: 700; }
+  .order-date { color: var(--gray1); font-size: 13px; margin-bottom: 10px; }
+  .order-item { display: flex; justify-content: space-between; padding: 3px 0; color: var(--label2); font-size: 14px; }
+  .order-total { border-top: 0.5px solid var(--separator); margin-top: 10px; padding-top: 10px; text-align: right; font-size: 18px; font-weight: 700; }
+
+  /* 주차 */
+  .parking-wrap { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 56px - 56px); padding: 20px; }
+  .parking-card { border-radius: var(--radius-lg); padding: 32px; width: 400px; max-width: 100%; text-align: center; }
+  .parking-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .parking-card .sub { color: var(--gray1); font-size: 14px; margin-bottom: 24px; }
+  .parking-card .existing { background: var(--accent-light); padding: 10px 16px; border-radius: 12px; margin-bottom: 16px; font-size: 14px; color: var(--label2); }
+  .parking-card .existing strong { color: var(--accent); }
+  .parking-card input { width: 100%; padding: 14px; font-size: 18px; background: var(--gray6); border: 1px solid var(--gray4); border-radius: 12px; color: var(--label); text-align: center; margin-bottom: 12px; outline: none; transition: border 0.2s; }
+  .parking-card input:focus { border-color: var(--accent); }
+  .parking-card button { width: 100%; padding: 16px; font-size: 17px; font-weight: 700; background: var(--accent); color: #fff; border: none; border-radius: 14px; }
+</style>
+</head>
+<body>
+
+<header class="glass">
+  <span class="logo">t 오더</span>
+  <div class="table-badge"><div class="lbl">테이블번호</div><div class="num">5</div></div>
+</header>
+
+<div class="tab-bar glass">
+  <button class="active" onclick="showPage('menu',this)">🍽️ 메뉴</button>
+  <button onclick="showPage('cart',this)">🛒 장바구니</button>
+  <button onclick="showPage('orders',this)">📋 주문내역</button>
+  <button onclick="showPage('parking',this)">🅿️ 주차등록</button>
+</div>
+
+<!-- 메뉴 -->
+<div id="page-menu" class="page active">
+  <div class="menu-layout">
+    <aside class="sidebar">
+      <button class="active">전체</button>
+      <button>메인</button>
+      <button>사이드</button>
+      <button>음료</button>
+      <button>주류</button>
+    </aside>
+    <div class="menu-main">
+      <h2>전체메뉴</h2>
+      <div class="count">8개</div>
+      <div class="grid">
+        <div class="menu-card glass"><div class="img"><div class="ph">🥩</div><div class="qty-badge">2</div></div><div class="info"><div class="name">숯불갈비</div><div class="desc">양념 숯불갈비 1인분</div><div class="price">18,000원</div></div></div>
+        <div class="menu-card glass"><div class="img"><div class="ph">🥘</div></div><div class="info"><div class="name">된장찌개</div><div class="desc">전통 된장찌개</div><div class="price">8,000원</div></div></div>
+        <div class="menu-card glass"><div class="img"><div class="ph">🍚</div></div><div class="info"><div class="name">공기밥</div><div class="price">1,000원</div></div></div>
+        <div class="menu-card glass"><div class="img"><div class="ph">🥗</div></div><div class="info"><div class="name">샐러드</div><div class="desc">신선한 계절 샐러드</div><div class="price">7,000원</div></div></div>
+        <div class="menu-card glass"><div class="img"><div class="ph">🍺</div></div><div class="info"><div class="name">생맥주</div><div class="desc">500ml</div><div class="price">5,000원</div></div></div>
+        <div class="menu-card glass"><div class="img"><div class="ph">🥤</div></div><div class="info"><div class="name">콜라</div><div class="price">2,000원</div></div></div>
+        <div class="menu-card glass"><div class="img"><div class="ph">🍖</div><div class="sold"><span>SOLD OUT</span></div></div><div class="info"><div class="name">양념치킨</div><div class="desc">바삭한 양념치킨</div><div class="price">17,000원</div></div></div>
+        <div class="menu-card glass"><div class="img"><div class="ph">🧊</div></div><div class="info"><div class="name">소주</div><div class="price">5,000원</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 장바구니 -->
+<div id="page-cart" class="page">
+  <div class="cart-page">
+    <h2>장바구니</h2>
+    <div class="cart-list glass">
+      <div class="cart-item"><div><div class="name">숯불갈비</div><div class="unit">18,000원</div></div><div class="cart-controls"><button class="qty-btn">−</button><span class="qty">2</span><button class="qty-btn">+</button><span class="subtotal">36,000원</span><button class="rm-btn">✕</button></div></div>
+      <div class="cart-item"><div><div class="name">된장찌개</div><div class="unit">8,000원</div></div><div class="cart-controls"><button class="qty-btn">−</button><span class="qty">1</span><button class="qty-btn">+</button><span class="subtotal">8,000원</span><button class="rm-btn">✕</button></div></div>
+      <div class="cart-item"><div><div class="name">공기밥</div><div class="unit">1,000원</div></div><div class="cart-controls"><button class="qty-btn">−</button><span class="qty">2</span><button class="qty-btn">+</button><span class="subtotal">2,000원</span><button class="rm-btn">✕</button></div></div>
+    </div>
+    <div class="cart-footer"><button class="clear-btn">전체삭제</button><div class="total">합계 46,000원</div></div>
+    <button class="order-btn">주문하기 (3건)</button>
+  </div>
+</div>
+
+<!-- 주문내역 -->
+<div id="page-orders" class="page">
+  <div class="order-page">
+    <h2>주문 내역</h2>
+    <div class="order-card glass">
+      <div class="order-header"><span class="order-num">주문 #1</span><span class="status" style="background:var(--green)">완료</span></div>
+      <div class="order-date">2026. 3. 20. 오후 1:15:00</div>
+      <div class="order-item"><span>숯불갈비 × 2</span><span>36,000원</span></div>
+      <div class="order-item"><span>공기밥 × 2</span><span>2,000원</span></div>
+      <div class="order-total">38,000원</div>
+    </div>
+    <div class="order-card glass">
+      <div class="order-header"><span class="order-num">주문 #2</span><span class="status" style="background:var(--orange)">준비중</span></div>
+      <div class="order-date">2026. 3. 20. 오후 1:30:00</div>
+      <div class="order-item"><span>된장찌개 × 1</span><span>8,000원</span></div>
+      <div class="order-item"><span>생맥주 × 2</span><span>10,000원</span></div>
+      <div class="order-total">18,000원</div>
+    </div>
+    <div class="order-card glass">
+      <div class="order-header"><span class="order-num">주문 #3</span><span class="status" style="background:var(--gray1)">대기중</span></div>
+      <div class="order-date">2026. 3. 20. 오후 1:35:00</div>
+      <div class="order-item"><span>콜라 × 1</span><span>2,000원</span></div>
+      <div class="order-total">2,000원</div>
+    </div>
+  </div>
+</div>
+
+<!-- 주차등록 -->
+<div id="page-parking" class="page">
+  <div class="parking-wrap">
+    <div class="parking-card glass">
+      <h2>🅿️ 무료 주차 등록</h2>
+      <p class="sub">완료된 주문이 있어야 등록 가능합니다</p>
+      <div class="existing">현재 등록: <strong>12가 3456</strong></div>
+      <input placeholder="차량 번호 (예: 12가3456)" value="12가 3456">
+      <button>수정하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
