@@ -23,7 +23,7 @@ export function TableLogin() {
     e.preventDefault(); setError('');
     try {
       const res = await authApi.tableLogin(slug, Number(tableNumber), password);
-      login(res.token, 'customer', { sessionId: res.session_id, storeId: slug });
+      login(res.token, 'customer', { sessionId: res.session_id, storeId: slug, tableId: res.table_id });
     } catch (err: unknown) { setError(err instanceof Error ? err.message : '로그인 실패'); }
   };
 

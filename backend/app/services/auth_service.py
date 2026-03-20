@@ -81,7 +81,7 @@ class AuthService:
         token = self._create_token({
             "table_id": str(table.id), "session_id": str(session.id), "store_id": str(store.id)
         })
-        return {"token": token, "session_id": session.id}
+        return {"token": token, "session_id": session.id, "table_id": table.id}
 
     def verify_token(self, token: str) -> dict:
         if token in self._blacklist:

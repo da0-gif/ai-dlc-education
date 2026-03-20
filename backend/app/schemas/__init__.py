@@ -21,6 +21,7 @@ class TokenResponse(BaseModel):
 class TableLoginResponse(BaseModel):
     token: str
     session_id: UUID
+    table_id: UUID
 
 # Store
 class StoreCreate(BaseModel):
