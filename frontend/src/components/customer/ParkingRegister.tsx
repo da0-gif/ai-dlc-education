@@ -33,7 +33,8 @@ export function ParkingRegister() {
     <div style={{ background: 'var(--bg-primary)', minHeight: 'calc(100vh - 56px - 64px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ ...glass, borderRadius: 24, padding: 32, width: 400, maxWidth: '90%' }}>
         <h2 style={{ color: 'var(--text-primary)', margin: '0 0 8px', textAlign: 'center', fontWeight: '700' }}>🅿️ 무료 주차 등록</h2>
-        <p style={{ color: 'var(--text-muted)', textAlign: 'center', margin: '0 0 24px', fontSize: 14 }}>완료된 주문이 있어야 등록 가능합니다</p>
+        <p style={{ color: 'var(--text-muted)', textAlign: 'center', margin: '0 0 8px', fontSize: 14 }}>완료된 주문이 있어야 등록 가능합니다</p>
+        <p style={{ color: 'var(--text-muted)', textAlign: 'center', margin: '0 0 24px', fontSize: 13, lineHeight: 1.5 }}>주차 등록은 한대만 가능합니다.<br/>추가 등록은 가맹주에게 요청해주세요.</p>
         {message && <div style={{ background: 'rgba(48,209,88,0.15)', color: '#30d158', padding: '10px 16px', borderRadius: 12, marginBottom: 16, fontSize: 14, fontWeight: '500' }}>{message}</div>}
         {error && <div style={{ background: 'rgba(255,59,48,0.15)', color: '#ff3b30', padding: '10px 16px', borderRadius: 12, marginBottom: 16, fontSize: 14, fontWeight: '500' }}>{error}</div>}
         {existing && <div style={{ background: 'var(--bg-input)', padding: '10px 16px', borderRadius: 12, marginBottom: 16, color: 'var(--text-secondary)', fontSize: 14 }}>현재 등록: <strong style={{ color: 'var(--text-primary)' }}>{existing.plate_number}</strong></div>}
