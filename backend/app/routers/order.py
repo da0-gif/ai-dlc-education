@@ -1,5 +1,4 @@
 from uuid import UUID
-from typing import Optional
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
@@ -7,6 +6,7 @@ from app.schemas import OrderCreate, OrderResponse, OrderStatusUpdate
 from app.services.order_service import OrderService
 from app.services.sse_service import SSEService
 from app.repositories import OrderRepository, OrderItemRepository, MenuRepository
+from app.dependencies import resolve_store_id
 
 router = APIRouter(tags=["orders"])
 sse = SSEService()
@@ -19,12 +19,12 @@ def get_order_service(db: AsyncSession = Depends(get_db)) -> OrderService:
     )
 
 
-@router.post("/api/stores/{store_id}/tables/{table_id}/orders", response_model=OrderResponse)
-async def create_order(store_id: UUID, table_id: UUID, req: OrderCreate, svc: OrderService = Depends(get_order_service)):
+@router.post("/api/stores/{store_slug}/tables/{table_id}/orders", response_model=OrderResponse)
+async def create_order(table_id: UUID, req: OrderCreate, store_id: UUID = Depends(resolve_store_id), svc: OrderService = Depends(get_order_service)):
     return await svc.create_order(store_id, table_id, req.session_id, [i.model_dump() for i in req.items])
 
 
-@router.get("/api/stores/{store_id}/tables/{table_id}/orders", response_model=list[OrderResponse])
+@router.get("/api/stores/{store_slug}/tables/{table_id}/orders", response_model=list[OrderResponse])
 async def get_orders(session_id: UUID, svc: OrderService = Depends(get_order_service)):
     return await svc.get_orders(session_id)
 

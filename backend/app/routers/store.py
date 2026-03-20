@@ -5,6 +5,7 @@ from app.database import get_db
 from app.schemas import StoreCreate, StoreUpdate, StoreResponse
 from app.services.store_service import StoreService
 from app.repositories import StoreRepository
+from app.dependencies import resolve_store_id
 
 router = APIRouter(tags=["stores"])
 
@@ -23,8 +24,8 @@ async def get_stores(svc: StoreService = Depends(get_store_service)):
     return await svc.get_stores()
 
 
-@router.put("/api/admin/stores/{store_id}", response_model=StoreResponse)
-async def update_store(store_id: UUID, req: StoreUpdate, svc: StoreService = Depends(get_store_service)):
+@router.put("/api/admin/stores/{store_slug}", response_model=StoreResponse)
+async def update_store(req: StoreUpdate, store_id: UUID = Depends(resolve_store_id), svc: StoreService = Depends(get_store_service)):
     return await svc.update_store(store_id, req.model_dump(exclude_unset=True))
 
 

@@ -9,10 +9,34 @@ from app.database import engine
 from app.models import Base
 
 
+async def create_default_admin():
+    from app.database import async_session
+    from app.services.auth_service import hash_password
+    from sqlalchemy import select
+    from app.models import Store, Admin
+
+    async with async_session() as session:
+        result = await session.execute(select(Store).where(Store.slug == "test-store"))
+        store = result.scalar_one_or_none()
+        if not store:
+            store = Store(name="Test Store", slug="test-store")
+            session.add(store)
+            await session.flush()
+
+        result = await session.execute(
+            select(Admin).where(Admin.store_id == store.id, Admin.username == "admin"))
+        if not result.scalar_one_or_none():
+            admin = Admin(store_id=store.id, username="admin", password_hash=hash_password("admin1234"))
+            session.add(admin)
+
+        await session.commit()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    await create_default_admin()
     yield
 
 
