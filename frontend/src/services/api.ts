@@ -20,6 +20,7 @@ export const authApi = {
     request<{ token: string }>('/auth/admin/login', { method: 'POST', body: JSON.stringify({ slug, username, password }) }),
   tableLogin: (slug: string, table_number: number, password: string) =>
     request<{ token: string; session_id: string }>('/auth/table/login', { method: 'POST', body: JSON.stringify({ slug, table_number, password }) }),
+  verify: (token: string) => request<{ valid: boolean }>(`/auth/verify?token=${encodeURIComponent(token)}`),
 };
 
 // Store

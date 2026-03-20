@@ -23,3 +23,9 @@ async def admin_login(req: AdminLoginRequest, svc: AuthService = Depends(get_aut
 @router.post("/table/login", response_model=TableLoginResponse)
 async def table_login(req: TableLoginRequest, svc: AuthService = Depends(get_auth_service)):
     return await svc.table_login(req.slug, req.table_number, req.password)
+
+
+@router.get("/verify")
+async def verify_token(token: str, svc: AuthService = Depends(get_auth_service)):
+    svc.verify_token(token)
+    return {"valid": True}

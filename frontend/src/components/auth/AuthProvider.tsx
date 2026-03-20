@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AuthState } from '../../types';
+import { authApi } from '../../services/api';
 
 const AuthContext = createContext<{
   auth: AuthState;
@@ -26,6 +27,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: !!token,
     };
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    authApi.verify(token).catch(() => {
+      ['token', 'role', 'sessionId', 'storeId', 'tableId'].forEach(k => localStorage.removeItem(k));
+      setAuth({ token: null, sessionId: null, storeId: null, tableId: null, role: null, isAuthenticated: false });
+    });
+  }, []);
 
   const login = (token: string, role: 'customer' | 'admin', extra?: Record<string, string>) => {
     localStorage.setItem('token', token);
