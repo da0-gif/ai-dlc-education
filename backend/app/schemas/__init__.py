@@ -33,6 +33,7 @@ class StoreUpdate(BaseModel):
     name: Optional[str] = None
     address: Optional[str] = None
     phone: Optional[str] = None
+    theme: Optional[str] = None
 
 class StoreResponse(BaseModel):
     id: UUID
@@ -40,6 +41,7 @@ class StoreResponse(BaseModel):
     slug: str
     address: Optional[str]
     phone: Optional[str]
+    theme: str = "dark"
     class Config:
         from_attributes = True
 

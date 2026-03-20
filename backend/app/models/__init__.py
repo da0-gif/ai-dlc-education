@@ -16,6 +16,7 @@ class Store(Base):
     slug = Column(String, unique=True, nullable=False)
     address = Column(String, nullable=True)
     phone = Column(String, nullable=True)
+    theme = Column(String, default="dark", nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 

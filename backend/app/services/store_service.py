@@ -21,3 +21,9 @@ class StoreService:
 
     async def get_stores(self):
         return await self.store_repo.find_all()
+
+    async def get_store_by_slug(self, slug: str):
+        store = await self.store_repo.find_by_slug(slug)
+        if not store:
+            raise NotFoundError("Store not found")
+        return store

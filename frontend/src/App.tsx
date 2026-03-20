@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/auth/AuthProvider';
-import { ThemeProvider } from './components/theme/ThemeProvider';
+import { ThemeProvider, useTheme } from './components/theme/ThemeProvider';
 import { TableLogin, AdminLogin } from './components/auth/LoginForms';
 import { MenuView } from './components/customer/MenuView';
 import { CartManager } from './components/customer/CartManager';
@@ -49,10 +49,15 @@ function CustomerNav({ cartCount }: { cartCount: number }) {
 
 function CustomerLayout() {
   const { auth } = useAuth();
+  const { loadStoreTheme } = useTheme();
   const [cart, setCart] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem('cart');
     return saved ? JSON.parse(saved) : [];
   });
+
+  useEffect(() => {
+    if (auth.storeId) loadStoreTheme(auth.storeId);
+  }, [auth.storeId, loadStoreTheme]);
 
   const saveCart = (items: CartItem[]) => { setCart(items); localStorage.setItem('cart', JSON.stringify(items)); };
 
@@ -89,6 +94,12 @@ function CustomerLayout() {
 
 function AdminLayout() {
   const { auth, logout } = useAuth();
+  const { loadStoreTheme } = useTheme();
+
+  useEffect(() => {
+    if (auth.storeId) loadStoreTheme(auth.storeId);
+  }, [auth.storeId, loadStoreTheme]);
+
   if (!auth.isAuthenticated || auth.role !== 'admin') return <AdminLogin />;
 
   return (
