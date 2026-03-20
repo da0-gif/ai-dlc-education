@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../auth/AuthProvider';
-import { menuApi, categoryApi, storeApi } from '../../services/api';
+import { menuApi, categoryApi, storeApi, tableApi, orderApi } from '../../services/api';
 import { Menu, Category } from '../../types';
 
 const pageStyle: React.CSSProperties = { padding: 24 };
@@ -94,7 +94,102 @@ export function MenuManager() {
 }
 
 export function TableManager() {
-  return <div style={pageStyle}><h2 style={{ color: 'var(--text-primary)', marginBottom: 16 }}>테이블 관리</h2><div style={cardStyle}>테이블 설정, 주문 삭제, 이용 완료, 과거 내역</div></div>;
+  const { auth } = useAuth();
+  const [tables, setTables] = useState<{ id: string; table_number: number }[]>([]);
+  const [sessions, setSessions] = useState<Record<string, boolean>>({});
+  const [form, setForm] = useState({ table_number: '', password: '' });
+  const [selectedTable, setSelectedTable] = useState<string | null>(null);
+  const [history, setHistory] = useState<{ id: string; order_data: Record<string, unknown>; total_amount: number; completed_at: string }[]>([]);
+  const [orders, setOrders] = useState<{ id: string; order_number: number; status: string; total_amount: number; items: { id: string; menu_name: string; quantity: number; subtotal: number }[] }[]>([]);
+  const [msg, setMsg] = useState('');
+
+  const storeId = auth.storeId!;
+  const load = useCallback(async () => {
+    const t = await tableApi.list(storeId) as typeof tables;
+    setTables(t);
+  }, [storeId]);
+  useEffect(() => { load(); }, [load]);
+
+  const handleCreate = async () => {
+    if (!form.table_number || !form.password) return;
+    setMsg('');
+    try {
+      await tableApi.create(storeId, { table_number: Number(form.table_number), password: form.password });
+      setForm({ table_number: '', password: '' });
+      setMsg('테이블이 등록되었습니다.');
+      load();
+    } catch (err: unknown) { setMsg(err instanceof Error ? err.message : '등록 실패'); }
+  };
+
+  const handleComplete = async (tableId: string) => {
+    try {
+      await tableApi.complete(storeId, tableId);
+      setMsg('이용 완료 처리되었습니다.');
+      setSessions(p => ({ ...p, [tableId]: false }));
+      if (selectedTable === tableId) { setOrders([]); }
+      load();
+    } catch (err: unknown) { setMsg(err instanceof Error ? err.message : '처리 실패'); }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    try {
+      await orderApi.delete(orderId);
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      setMsg('주문이 삭제되었습니다.');
+    } catch (err: unknown) { setMsg(err instanceof Error ? err.message : '삭제 실패'); }
+  };
+
+  const viewHistory = async (tableId: string) => {
+    setSelectedTable(tableId);
+    setOrders([]);
+    const h = await tableApi.history(storeId, tableId) as typeof history;
+    setHistory(h);
+  };
+
+  const inputStyle: React.CSSProperties = { padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: 14, width: '100%' };
+
+  return (
+    <div style={pageStyle}>
+      <h2 style={{ color: 'var(--text-primary)', marginBottom: 16 }}>테이블 관리</h2>
+      {msg && <div style={{ padding: '10px 16px', borderRadius: 8, marginBottom: 16, fontSize: 14, background: msg.includes('실패') ? 'rgba(255,59,48,0.15)' : 'rgba(48,209,88,0.15)', color: msg.includes('실패') ? '#ff3b30' : '#30d158' }}>{msg}</div>}
+
+      <div style={{ ...cardStyle, textAlign: 'left', marginBottom: 16, padding: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
+        <input value={form.table_number} onChange={e => setForm(p => ({ ...p, table_number: e.target.value }))} placeholder="테이블 번호" type="number" style={{ ...inputStyle, flex: 1 }} />
+        <input value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} placeholder="비밀번호" type="password" style={{ ...inputStyle, flex: 1 }} />
+        <button onClick={handleCreate} disabled={!form.table_number || !form.password} style={{ padding: '8px 16px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: 700 }}>등록</button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+        {tables.map(t => (
+          <div key={t.id} style={{ ...cardStyle, padding: 16, textAlign: 'center' }}>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{t.table_number}</div>
+            <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button onClick={() => handleComplete(t.id)} style={{ padding: '6px 12px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>이용완료</button>
+              <button onClick={() => viewHistory(t.id)} style={{ padding: '6px 12px', background: 'var(--btn-secondary)', color: 'var(--btn-secondary-text)', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>과거내역</button>
+            </div>
+          </div>
+        ))}
+        {tables.length === 0 && <div style={{ ...cardStyle, gridColumn: '1/-1' }}>등록된 테이블이 없습니다.</div>}
+      </div>
+
+      {selectedTable && history.length > 0 && (
+        <div>
+          <h3 style={{ color: 'var(--text-primary)', marginBottom: 12 }}>테이블 {tables.find(t => t.id === selectedTable)?.table_number} 과거 내역</h3>
+          {history.map(h => (
+            <div key={h.id} style={{ ...cardStyle, textAlign: 'left', padding: 14, marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{h.total_amount.toLocaleString()}원</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>{new Date(h.completed_at).toLocaleString()}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {selectedTable && history.length === 0 && (
+        <div style={cardStyle}>과거 내역이 없습니다.</div>
+      )}
+    </div>
+  );
 }
 
 export function StoreManager() {

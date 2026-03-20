@@ -150,7 +150,25 @@
 
 <!-- 테이블 관리 -->
 <div id="t-tables" class="tab">
-  <div class="pad"><h2>테이블 관리</h2><div class="ph-card glass">테이블 설정, 주문 삭제, 이용 완료, 과거 내역</div></div>
+  <div class="pad">
+    <h2>테이블 관리</h2>
+    <div class="form-card glass" style="display:flex;gap:8px;align-items:center">
+      <input placeholder="테이블 번호" type="number" style="flex:1">
+      <input placeholder="비밀번호" type="password" style="flex:1">
+      <button style="padding:10px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;white-space:nowrap;cursor:pointer;font-weight:700">등록</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px">
+      <div class="glass" style="border-radius:16px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--t1);margin-bottom:8px">1</div><div style="display:flex;gap:6px;justify-content:center"><button class="pill" style="background:var(--accent);font-size:12px;padding:6px 12px">이용완료</button><button class="btn-sm" style="background:var(--btn2);color:var(--btn2t)">과거내역</button></div></div>
+      <div class="glass" style="border-radius:16px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--t1);margin-bottom:8px">2</div><div style="display:flex;gap:6px;justify-content:center"><button class="pill" style="background:var(--accent);font-size:12px;padding:6px 12px">이용완료</button><button class="btn-sm" style="background:var(--btn2);color:var(--btn2t)">과거내역</button></div></div>
+      <div class="glass" style="border-radius:16px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--t1);margin-bottom:8px">3</div><div style="display:flex;gap:6px;justify-content:center"><button class="pill" style="background:var(--accent);font-size:12px;padding:6px 12px">이용완료</button><button class="btn-sm" style="background:var(--btn2);color:var(--btn2t)">과거내역</button></div></div>
+      <div class="glass" style="border-radius:16px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--t1);margin-bottom:8px">4</div><div style="display:flex;gap:6px;justify-content:center"><button class="pill" style="background:var(--accent);font-size:12px;padding:6px 12px">이용완료</button><button class="btn-sm" style="background:var(--btn2);color:var(--btn2t)">과거내역</button></div></div>
+      <div class="glass" style="border-radius:16px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--t1);margin-bottom:8px">5</div><div style="display:flex;gap:6px;justify-content:center"><button class="pill" style="background:var(--accent);font-size:12px;padding:6px 12px">이용완료</button><button class="btn-sm" style="background:var(--btn2);color:var(--btn2t)">과거내역</button></div></div>
+      <div class="glass" style="border-radius:16px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--t1);margin-bottom:8px">6</div><div style="display:flex;gap:6px;justify-content:center"><button class="pill" style="background:var(--accent);font-size:12px;padding:6px 12px">이용완료</button><button class="btn-sm" style="background:var(--btn2);color:var(--btn2t)">과거내역</button></div></div>
+    </div>
+    <h3 style="color:var(--t1);margin:20px 0 12px">테이블 3 과거 내역</h3>
+    <div class="glass menu-item"><div style="display:flex;justify-content:space-between;width:100%"><span style="color:var(--t1);font-weight:600">38,000원</span><span style="color:var(--tm);font-size:13px">2026. 3. 20. 오후 1:20:00</span></div></div>
+    <div class="glass menu-item"><div style="display:flex;justify-content:space-between;width:100%"><span style="color:var(--t1);font-weight:600">25,000원</span><span style="color:var(--tm);font-size:13px">2026. 3. 19. 오후 7:45:00</span></div></div>
+  </div>
 </div>
 
 <!-- 매장 관리 -->
