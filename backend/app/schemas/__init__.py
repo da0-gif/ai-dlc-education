@@ -1,12 +1,12 @@
 from uuid import UUID
 from typing import Optional
 from pydantic import BaseModel, Field
-from datetime import date
+from datetime import date, datetime
 
 
 # Auth
 class AdminLoginRequest(BaseModel):
-    slug: str
+    slug: Optional[str] = ""
     username: str
     password: str
 
@@ -123,7 +123,7 @@ class OrderResponse(BaseModel):
     order_number: int
     status: str
     total_amount: int
-    created_at: str
+    created_at: datetime
     items: list[OrderItemResponse] = []
     class Config:
         from_attributes = True

@@ -223,6 +223,13 @@ class OrderRepository:
                 func.date(Order.created_at) == d))
         return list(result.scalars().all())
 
+    async def find_active_by_store(self, store_id: UUID) -> list[Order]:
+        result = await self.db.execute(
+            select(Order).where(
+                Order.store_id == store_id, Order.status.in_(["PENDING", "PREPARING"])
+            ).order_by(Order.created_at.desc()))
+        return list(result.scalars().all())
+
     async def update(self, order_id: UUID, data: dict) -> Order:
         order = await self.find_by_id(order_id)
         for k, v in data.items():

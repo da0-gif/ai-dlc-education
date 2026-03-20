@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../auth/AuthProvider';
+import { useStoreContext } from '../../App';
 import { menuApi, categoryApi, storeApi, tableApi, orderApi } from '../../services/api';
 import { Menu, Category } from '../../types';
 
@@ -7,7 +8,7 @@ const pageStyle: React.CSSProperties = { padding: 24 };
 const cardStyle: React.CSSProperties = { background: 'var(--bg-card)', borderRadius: 12, padding: 32, textAlign: 'center', color: 'var(--text-muted)', border: '1px solid var(--border)' };
 
 export function MenuManager() {
-  const { auth } = useAuth();
+  const { storeSlug } = useStoreContext();
   const [menus, setMenus] = useState<Menu[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
@@ -15,7 +16,7 @@ export function MenuManager() {
   const [image, setImage] = useState<File | null>(null);
   const [newCat, setNewCat] = useState('');
 
-  const storeId = auth.storeId!;
+  const storeId = storeSlug;
   const load = useCallback(async () => {
     const [m, c] = await Promise.all([menuApi.list(storeId), categoryApi.list(storeId)]);
     setMenus(m as Menu[]); setCategories(c as Category[]);
@@ -94,7 +95,7 @@ export function MenuManager() {
 }
 
 export function TableManager() {
-  const { auth } = useAuth();
+  const { storeSlug } = useStoreContext();
   const [tables, setTables] = useState<{ id: string; table_number: number }[]>([]);
   const [activeTables, setActiveTables] = useState<string[]>([]);
   const [form, setForm] = useState({ table_number: '', password: '' });
@@ -103,7 +104,7 @@ export function TableManager() {
   const [editPw, setEditPw] = useState<{ id: string; pw: string } | null>(null);
   const [msg, setMsg] = useState('');
 
-  const storeId = auth.storeId!;
+  const storeId = storeSlug;
   const load = useCallback(async () => {
     const [t, a] = await Promise.all([tableApi.list(storeId), tableApi.active(storeId)]);
     setTables(t as typeof tables);

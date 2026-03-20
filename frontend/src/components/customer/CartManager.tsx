@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CartItem } from '../../types';
 import { orderApi } from '../../services/api';
 import { useAuth } from '../auth/AuthProvider';
@@ -11,6 +11,12 @@ export function CartManager({ cart, onUpdateQuantity, onRemove, onClear, onOrder
   const navigate = useNavigate();
   const [popup, setPopup] = useState<{ count: number; total: number } | null>(null);
   const total = cart.reduce((sum, item) => sum + item.subtotal, 0);
+
+  useEffect(() => {
+    if (!popup) return;
+    const timer = setTimeout(() => { setPopup(null); navigate('/customer'); }, 5000);
+    return () => clearTimeout(timer);
+  }, [popup, navigate]);
 
   const glass: React.CSSProperties = { background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', boxShadow: 'var(--glass-shadow)' };
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/auth/AuthProvider';
 import { ThemeProvider, useTheme } from './components/theme/ThemeProvider';
@@ -11,6 +11,10 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 import { MenuManager, TableManager, StoreManager } from './components/admin/AdminManagement';
 import { ThemeSettings } from './components/admin/ThemeSettings';
 import { CartItem, Menu } from './types';
+import { storeApi } from './services/api';
+
+const StoreContext = createContext<{ storeSlug: string }>({ storeSlug: '' });
+export const useStoreContext = () => useContext(StoreContext);
 
 function CustomerNav({ cartCount }: { cartCount: number }) {
   const { auth, logout } = useAuth();
@@ -116,36 +120,81 @@ function CustomerLayout() {
 function AdminLayout() {
   const { auth, logout } = useAuth();
   const { loadStoreInfo } = useTheme();
+  const [selectedStore, setSelectedStore] = useState<string | null>(null);
+  const [stores, setStores] = useState<{ id: string; name: string; slug: string }[]>([]);
+  const isSuper = auth.storeId === '__super__';
 
   useEffect(() => {
-    if (auth.storeId) loadStoreInfo(auth.storeId);
-  }, [auth.storeId, loadStoreInfo]);
+    if (isSuper) {
+      storeApi.list().then(res => setStores(res as typeof stores)).catch(() => {});
+    }
+  }, [isSuper]);
+
+  const activeStoreSlug = isSuper ? selectedStore : auth.storeId;
+
+  useEffect(() => {
+    if (activeStoreSlug && activeStoreSlug !== '__super__') loadStoreInfo(activeStoreSlug);
+  }, [activeStoreSlug, loadStoreInfo]);
 
   if (!auth.isAuthenticated || auth.role !== 'admin') return <AdminLogin />;
 
+  if (isSuper && !selectedStore) {
+    return (
+      <div style={{ background: 'var(--bg-primary)', minHeight: '100vh' }}>
+        <nav style={{ display: 'flex', padding: '0 16px', background: 'var(--bg-header)', borderBottom: '1px solid var(--border)', alignItems: 'center', height: 56 }}>
+          <span style={{ color: 'var(--accent)', fontSize: 20, fontWeight: 'bold', marginRight: 24 }}>송오더 관리 (전체)</span>
+          <Link to="/admin/stores" style={{ padding: '16px 20px', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 15 }}>매장</Link>
+          <button onClick={logout} style={{ marginLeft: 'auto', padding: '8px 20px', background: 'var(--btn-secondary)', color: 'var(--btn-secondary-text)', border: 'none', borderRadius: 6, fontSize: 14 }}>로그아웃</button>
+        </nav>
+        <Routes>
+          <Route path="stores" element={<StoreManager />} />
+          <Route path="*" element={
+            <div style={{ padding: 24 }}>
+              <h2 style={{ color: 'var(--text-primary)', marginBottom: 20 }}>매장을 선택하세요</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+                {stores.map(s => (
+                  <div key={s.id} onClick={() => setSelectedStore(s.slug)} style={{ background: 'var(--bg-card)', borderRadius: 12, padding: 24, border: '1px solid var(--border)', cursor: 'pointer' }}>
+                    <div style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>{s.name}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>{s.slug}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          } />
+        </Routes>
+      </div>
+    );
+  }
+
+  const storeName = isSuper ? stores.find(s => s.slug === selectedStore)?.name : undefined;
+
   return (
-    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh' }}>
-      <nav style={{ display: 'flex', gap: 0, padding: '0 16px', background: 'var(--bg-header)', borderBottom: '1px solid var(--border)', alignItems: 'center', height: 56 }}>
-        <span style={{ color: 'var(--accent)', fontSize: 20, fontWeight: 'bold', marginRight: 24 }}>송오더 관리</span>
-        {[
-          { to: '/admin', label: '대시보드' },
-          { to: '/admin/menus', label: '메뉴' },
-          { to: '/admin/tables', label: '테이블' },
-          { to: '/admin/stores', label: '매장' },
-          { to: '/admin/theme', label: '테마' },
-        ].map(item => (
-          <Link key={item.to} to={item.to} style={{ padding: '16px 20px', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 15 }}>{item.label}</Link>
-        ))}
-        <button onClick={logout} style={{ marginLeft: 'auto', padding: '8px 20px', background: 'var(--btn-secondary)', color: 'var(--btn-secondary-text)', border: 'none', borderRadius: 6, fontSize: 14 }}>로그아웃</button>
-      </nav>
-      <Routes>
-        <Route index element={<AdminDashboard />} />
-        <Route path="menus" element={<MenuManager />} />
-        <Route path="tables" element={<TableManager />} />
-        <Route path="stores" element={<StoreManager />} />
-        <Route path="theme" element={<ThemeSettings />} />
-      </Routes>
-    </div>
+    <StoreContext.Provider value={{ storeSlug: activeStoreSlug! }}>
+      <div style={{ background: 'var(--bg-primary)', minHeight: '100vh' }}>
+        <nav style={{ display: 'flex', gap: 0, padding: '0 16px', background: 'var(--bg-header)', borderBottom: '1px solid var(--border)', alignItems: 'center', height: 56 }}>
+          <span style={{ color: 'var(--accent)', fontSize: 20, fontWeight: 'bold', marginRight: 24 }}>
+            {isSuper && <span onClick={() => setSelectedStore(null)} style={{ cursor: 'pointer' }}>◀ </span>}
+            송오더 관리{storeName ? ` - ${storeName}` : ''}
+          </span>
+          {[
+            { to: '/admin', label: '대시보드' },
+            { to: '/admin/menus', label: '메뉴' },
+            { to: '/admin/tables', label: '테이블' },
+            { to: '/admin/theme', label: '테마' },
+          ].map(item => (
+            <Link key={item.to} to={item.to} style={{ padding: '16px 20px', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 15 }}>{item.label}</Link>
+          ))}
+          <button onClick={logout} style={{ marginLeft: 'auto', padding: '8px 20px', background: 'var(--btn-secondary)', color: 'var(--btn-secondary-text)', border: 'none', borderRadius: 6, fontSize: 14 }}>로그아웃</button>
+        </nav>
+        <Routes>
+          <Route index element={<AdminDashboard />} />
+          <Route path="menus" element={<MenuManager />} />
+          <Route path="tables" element={<TableManager />} />
+          <Route path="stores" element={<StoreManager />} />
+          <Route path="theme" element={<ThemeSettings />} />
+        </Routes>
+      </div>
+    </StoreContext.Provider>
   );
 }
 

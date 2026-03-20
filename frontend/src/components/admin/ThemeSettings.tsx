@@ -1,16 +1,16 @@
 import React from 'react';
 import { useTheme } from '../theme/ThemeProvider';
-import { useAuth } from '../auth/AuthProvider';
+import { useStoreContext } from '../../App';
 import { storeApi } from '../../services/api';
 
 export function ThemeSettings() {
   const { theme, setTheme } = useTheme();
-  const { auth } = useAuth();
+  const { storeSlug } = useStoreContext();
 
   const handleSelect = async (t: 'dark' | 'light') => {
-    if (!auth.storeId) return;
+    if (!storeSlug) return;
     try {
-      await storeApi.update(auth.storeId, { theme: t });
+      await storeApi.update(storeSlug, { theme: t });
       setTheme(t);
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : '테마 변경 실패');

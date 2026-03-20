@@ -55,6 +55,7 @@ export const orderApi = {
     request(`/stores/${storeId}/tables/${tableId}/orders`, { method: 'POST', body: JSON.stringify({ session_id: sessionId, items }) }),
   list: (storeId: string, tableId: string, sessionId: string) =>
     request(`/stores/${storeId}/tables/${tableId}/orders?session_id=${sessionId}`),
+  listByStore: (storeSlug: string) => request(`/admin/stores/${storeSlug}/orders`),
   updateStatus: (orderId: string, status: string) =>
     request(`/admin/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
   delete: (orderId: string) => request(`/admin/orders/${orderId}`, { method: 'DELETE' }),

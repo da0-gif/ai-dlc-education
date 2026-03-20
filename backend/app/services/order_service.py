@@ -23,6 +23,8 @@ class OrderService:
         order_items = []
         for item in items:
             menu = await self.menu_repo.find_by_id(item["menu_id"])
+            if not menu:
+                raise NotFoundError(f"Menu not found: {item['menu_id']}")
             subtotal = menu.price * item["quantity"]
             total += subtotal
             order_items.append({"menu_id": menu.id, "menu_name": menu.name, "unit_price": menu.price,
@@ -32,12 +34,22 @@ class OrderService:
             store_id=store_id, table_id=table_id, session_id=session_id,
             order_number=order_number, status="PENDING", total_amount=total
         )
-        await self.order_item_repo.create_bulk(order.id, order_items)
+        items_created = await self.order_item_repo.create_bulk(order.id, order_items)
+        order.items = items_created
         await self.sse_service.broadcast(store_id, "order:created", {"order_id": str(order.id)})
         return order
 
     async def get_orders(self, session_id: UUID):
-        return await self.order_repo.find_by_session(session_id)
+        orders = await self.order_repo.find_by_session(session_id)
+        for order in orders:
+            order.items = await self.order_item_repo.find_by_order(order.id)
+        return orders
+
+    async def get_active_orders(self, store_id: UUID):
+        orders = await self.order_repo.find_active_by_store(store_id)
+        for order in orders:
+            order.items = await self.order_item_repo.find_by_order(order.id)
+        return orders
 
     async def update_order_status(self, order_id: UUID, new_status: str):
         order = await self.order_repo.find_by_id(order_id)
@@ -46,6 +58,7 @@ class OrderService:
         if VALID_TRANSITIONS.get(order.status) != new_status:
             raise BusinessError(f"Cannot transition from {order.status} to {new_status}")
         result = await self.order_repo.update(order_id, {"status": new_status})
+        result.items = await self.order_item_repo.find_by_order(order_id)
         await self.sse_service.broadcast(order.store_id, "order:status_changed", {"order_id": str(order_id)})
         return result
 

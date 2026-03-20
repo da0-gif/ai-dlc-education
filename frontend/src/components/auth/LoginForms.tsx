@@ -54,8 +54,8 @@ export function AdminLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setError('');
     try {
-      const res = await authApi.adminLogin(slug, username, password);
-      login(res.token, 'admin', { storeId: slug });
+      const res = await authApi.adminLogin(slug || '', username, password);
+      login(res.token, 'admin', { storeId: slug || '__super__' });
     } catch (err: unknown) { setError(err instanceof Error ? err.message : '로그인 실패'); }
   };
 
@@ -67,7 +67,7 @@ export function AdminLogin() {
           <p style={{ color: 'var(--text-muted)', margin: '8px 0 0', fontSize: 14 }}>관리자 로그인</p>
         </div>
         {error && <div style={{ background: 'rgba(255,59,48,0.15)', color: '#ff3b30', padding: '10px 16px', borderRadius: 12, marginBottom: 12, fontSize: 14, fontWeight: '500' }}>{error}</div>}
-        <input placeholder="매장 식별자" value={slug} onChange={e => setSlug(e.target.value)} style={inputStyle} />
+        <input placeholder="매장 식별자 (비우면 전체 매장 관리)" value={slug} onChange={e => setSlug(e.target.value)} style={inputStyle} />
         <input placeholder="사용자명" value={username} onChange={e => setUsername(e.target.value)} style={inputStyle} />
         <input placeholder="비밀번호" type="password" value={password} onChange={e => setPassword(e.target.value)} style={inputStyle} />
         <button type="submit" style={{ width: '100%', padding: 16, fontSize: 17, fontWeight: '700', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 14, cursor: 'pointer', marginTop: 4, boxShadow: '0 4px 20px rgba(0,122,255,0.3)' }}>로그인</button>
