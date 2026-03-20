@@ -1,16 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { orderApi } from '../../services/api';
 import { useAuth } from '../auth/AuthProvider';
 import { Order } from '../../types';
+import { useLocation } from 'react-router-dom';
 
 export function OrderList() {
   const { auth } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
+  const location = useLocation();
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!auth.storeId || !auth.tableId || !auth.sessionId) return;
     orderApi.list(auth.storeId, auth.tableId, auth.sessionId).then(d => setOrders(d as Order[]));
-  }, [auth]);
+  }, [auth.storeId, auth.tableId, auth.sessionId]);
+
+  useEffect(() => { load(); }, [load, location.key]);
 
   const statusCfg: Record<string, { label: string; bg: string }> = { PENDING: { label: '대기중', bg: 'rgba(142,142,147,0.24)' }, PREPARING: { label: '준비중', bg: 'rgba(255,159,10,0.2)' }, COMPLETED: { label: '완료', bg: 'rgba(48,209,88,0.2)' } };
   const statusColor: Record<string, string> = { PENDING: 'var(--text-muted)', PREPARING: '#ff9f0a', COMPLETED: '#30d158' };

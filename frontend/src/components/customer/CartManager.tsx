@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CartItem } from '../../types';
 import { orderApi } from '../../services/api';
 import { useAuth } from '../auth/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 interface Props { cart: CartItem[]; onUpdateQuantity: (menuId: string, quantity: number) => void; onRemove: (menuId: string) => void; onClear: () => void; onOrder: () => void; }
 
 export function CartManager({ cart, onUpdateQuantity, onRemove, onClear, onOrder }: Props) {
   const { auth } = useAuth();
+  const navigate = useNavigate();
+  const [popup, setPopup] = useState<{ count: number; total: number } | null>(null);
   const total = cart.reduce((sum, item) => sum + item.subtotal, 0);
 
   const glass: React.CSSProperties = { background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', boxShadow: 'var(--glass-shadow)' };
@@ -14,8 +17,11 @@ export function CartManager({ cart, onUpdateQuantity, onRemove, onClear, onOrder
   const handleOrder = async () => {
     if (!auth.storeId || !auth.tableId || !auth.sessionId || cart.length === 0) return;
     try {
+      const count = cart.reduce((s, i) => s + i.quantity, 0);
+      const orderTotal = total;
       await orderApi.create(auth.storeId, auth.tableId, auth.sessionId, cart.map(i => ({ menu_id: i.menuId, quantity: i.quantity })));
       onClear(); onOrder();
+      setPopup({ count, total: orderTotal });
     } catch (err: unknown) { alert(err instanceof Error ? err.message : '주문 실패'); }
   };
 
@@ -50,6 +56,16 @@ export function CartManager({ cart, onUpdateQuantity, onRemove, onClear, onOrder
         <div style={{ color: 'var(--text-primary)', fontSize: 22, fontWeight: '700' }}>합계 {total.toLocaleString()}원</div>
       </div>
       <button onClick={handleOrder} style={{ width: '100%', marginTop: 16, padding: 18, background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 16, fontSize: 18, fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,122,255,0.3)', letterSpacing: -0.3 }}>주문하기 ({cart.length}건)</button>
+      {popup && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setPopup(null)}>
+          <div style={{ ...glass, background: 'var(--bg-secondary)', borderRadius: 24, padding: '36px 32px', textAlign: 'center', maxWidth: 320, width: '90%' }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+            <div style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: '700', marginBottom: 8 }}>주문이 완료되었습니다!</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 20 }}>총 {popup.count}개 · {popup.total.toLocaleString()}원</div>
+            <button onClick={() => { setPopup(null); navigate('/customer/orders'); }} style={{ padding: '12px 40px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: '600', cursor: 'pointer' }}>확인</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
