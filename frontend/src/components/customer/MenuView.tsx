@@ -31,7 +31,7 @@ export function MenuView({ cart, onAddToCart }: Props) {
           const sel = selectedCategory === c.id;
           return (
             <button key={c.id ?? 'all'} onClick={() => setSelectedCategory(c.id)}
-              style={{ width: '100%', padding: '14px 8px', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: sel ? '700' : '400', background: sel ? 'var(--accent)' : 'transparent', color: sel ? '#fff' : 'var(--text-secondary)', borderRadius: sel ? 12 : 0, margin: sel ? '2px 4px' : 0, width: sel ? 'calc(100% - 8px)' : '100%', transition: 'all 0.25s ease' }}>
+              style={{ width: sel ? 'calc(100% - 8px)' : '100%', padding: '14px 8px', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: sel ? '700' : '400', background: sel ? 'var(--accent)' : 'transparent', color: sel ? '#fff' : 'var(--text-secondary)', borderRadius: sel ? 12 : 0, margin: sel ? '2px 4px' : 0, transition: 'all 0.25s ease' }}>
               {c.name}
             </button>
           );
