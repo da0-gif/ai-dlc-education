@@ -50,6 +50,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
+    const token = localStorage.getItem('token');
+    if (token) authApi.logout(token);
     ['token', 'role', 'sessionId', 'storeId', 'tableId'].forEach(k => localStorage.removeItem(k));
     setAuth({ token: null, sessionId: null, storeId: null, tableId: null, role: null, isAuthenticated: false });
   };

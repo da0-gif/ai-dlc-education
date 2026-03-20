@@ -29,3 +29,9 @@ async def table_login(req: TableLoginRequest, svc: AuthService = Depends(get_aut
 async def verify_token(token: str, svc: AuthService = Depends(get_auth_service)):
     svc.verify_token(token)
     return {"valid": True}
+
+
+@router.post("/logout")
+async def logout(token: str, svc: AuthService = Depends(get_auth_service)):
+    svc.logout(token)
+    return {"message": "Logged out"}

@@ -15,6 +15,8 @@ def verify_password(password: str, hashed: str) -> bool:
 
 
 class AuthService:
+    _blacklist: set[str] = set()
+
     def __init__(self, store_repo=None, admin_repo=None, table_repo=None, session_repo=None):
         self.store_repo = store_repo
         self.admin_repo = admin_repo
@@ -36,7 +38,7 @@ class AuthService:
         self._login_attempts[key] = attempt
 
     def _create_token(self, payload: dict) -> str:
-        expire = datetime.utcnow() + timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         payload["exp"] = expire
         return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
@@ -82,7 +84,12 @@ class AuthService:
         return {"token": token, "session_id": session.id}
 
     def verify_token(self, token: str) -> dict:
+        if token in self._blacklist:
+            raise AuthError("Token revoked")
         try:
             return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         except Exception:
             raise AuthError("Invalid token")
+
+    def logout(self, token: str):
+        self._blacklist.add(token)

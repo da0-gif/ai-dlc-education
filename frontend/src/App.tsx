@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/auth/AuthProvider';
 import { ThemeProvider, useTheme } from './components/theme/ThemeProvider';
 import { TableLogin, AdminLogin } from './components/auth/LoginForms';
@@ -13,9 +13,10 @@ import { ThemeSettings } from './components/admin/ThemeSettings';
 import { CartItem, Menu } from './types';
 
 function CustomerNav({ cartCount }: { cartCount: number }) {
-  const { auth } = useAuth();
+  const { auth, logout } = useAuth();
   const { storeName } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const isActive = (path: string) => location.pathname === path;
 
   const glass = { background: 'var(--nav-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)' } as React.CSSProperties;
@@ -30,12 +31,15 @@ function CustomerNav({ cartCount }: { cartCount: number }) {
     <>
       <header style={{ ...glass, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', height: 56, borderBottom: '1px solid var(--glass-border)', position: 'sticky', top: 0, zIndex: 100 }}>
         <span style={{ color: 'var(--accent)', fontSize: 22, fontWeight: '700', letterSpacing: -0.5 }}>{storeName || '송오더'}</span>
-        {auth.tableId && (
-          <div style={{ background: 'var(--accent)', color: '#fff', borderRadius: 14, padding: '4px 14px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,122,255,0.3)' }}>
-            <div style={{ fontSize: 9, lineHeight: 1, opacity: 0.8, letterSpacing: 0.5 }}>TABLE</div>
-            <div style={{ fontSize: 22, fontWeight: '700', lineHeight: 1.2 }}>{auth.tableId}</div>
-          </div>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {auth.tableId && (
+            <div style={{ background: 'var(--accent)', color: '#fff', borderRadius: 14, padding: '4px 14px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,122,255,0.3)' }}>
+              <div style={{ fontSize: 9, lineHeight: 1, opacity: 0.8, letterSpacing: 0.5 }}>TABLE</div>
+              <div style={{ fontSize: 22, fontWeight: '700', lineHeight: 1.2 }}>{auth.tableId}</div>
+            </div>
+          )}
+          <button onClick={() => { logout(); navigate('/customer'); }} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 12px', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer' }}>로그아웃</button>
+        </div>
       </header>
       <nav style={{ ...glass, position: 'fixed', bottom: 0, left: 0, right: 0, height: 64, borderTop: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-around', alignItems: 'center', zIndex: 100, paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {navItem('/customer', '메뉴', '🍽️')}
