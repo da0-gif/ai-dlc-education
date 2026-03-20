@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { parkingApi } from '../../services/api';
+import { parkingApi, orderApi } from '../../services/api';
 import { useAuth } from '../auth/AuthProvider';
 import { Parking } from '../../types';
 
@@ -7,6 +7,7 @@ export function ParkingRegister() {
   const { auth } = useAuth();
   const [plateNumber, setPlateNumber] = useState('');
   const [existing, setExisting] = useState<Parking | null>(null);
+  const [hasOrders, setHasOrders] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -14,6 +15,9 @@ export function ParkingRegister() {
     if (!auth.storeId || !auth.tableId || !auth.sessionId) return;
     parkingApi.get(auth.storeId, auth.tableId, auth.sessionId)
       .then(d => { if (d) { setExisting(d as Parking); setPlateNumber((d as Parking).plate_number); } })
+      .catch(() => {});
+    orderApi.list(auth.storeId, auth.tableId, auth.sessionId)
+      .then(d => setHasOrders(Array.isArray(d) && d.length > 0))
       .catch(() => {});
   }, [auth]);
 
@@ -40,7 +44,7 @@ export function ParkingRegister() {
         {existing && <div style={{ background: 'var(--bg-input)', padding: '10px 16px', borderRadius: 12, marginBottom: 16, color: 'var(--text-secondary)', fontSize: 14 }}>현재 등록: <strong style={{ color: 'var(--text-primary)' }}>{existing.plate_number}</strong></div>}
         <form onSubmit={handleSubmit}>
           <input placeholder="차량 번호 (예: 12가3456)" value={plateNumber} onChange={e => setPlateNumber(e.target.value)} style={{ width: '100%', padding: 14, fontSize: 18, background: 'var(--bg-input)', border: '1px solid var(--border-input)', borderRadius: 14, color: 'var(--text-primary)', textAlign: 'center', boxSizing: 'border-box', marginBottom: 12, outline: 'none' }} />
-          <button type="submit" style={{ width: '100%', padding: 16, fontSize: 17, fontWeight: '700', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 14, cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,122,255,0.3)' }}>{existing ? '수정하기' : '등록하기'}</button>
+          <button type="submit" disabled={!hasOrders || !plateNumber} style={{ width: '100%', padding: 16, fontSize: 17, fontWeight: '700', background: hasOrders && plateNumber ? 'var(--accent)' : 'var(--btn-secondary, #ccc)', color: hasOrders && plateNumber ? '#fff' : 'var(--text-muted)', border: 'none', borderRadius: 14, cursor: hasOrders && plateNumber ? 'pointer' : 'not-allowed', boxShadow: hasOrders && plateNumber ? '0 4px 20px rgba(0,122,255,0.3)' : 'none' }}>{existing ? '수정하기' : '등록하기'}</button>
         </form>
       </div>
     </div>
