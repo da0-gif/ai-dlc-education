@@ -37,6 +37,10 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     await create_default_admin()
+    from app.seed import seed_beijing_story
+    from app.seed_baeksojeong import seed_baeksojeong
+    await seed_beijing_story()
+    await seed_baeksojeong()
     yield
 
 
