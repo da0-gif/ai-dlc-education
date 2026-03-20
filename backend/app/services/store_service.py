@@ -19,6 +19,12 @@ class StoreService:
             raise NotFoundError("Store not found")
         return await self.store_repo.update(store_id, data)
 
+    async def delete_store(self, store_id: UUID):
+        store = await self.store_repo.find_by_id(store_id)
+        if not store:
+            raise NotFoundError("Store not found")
+        await self.store_repo.delete(store_id)
+
     async def get_stores(self):
         return await self.store_repo.find_all()
 

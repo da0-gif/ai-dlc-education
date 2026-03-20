@@ -26,7 +26,8 @@ export const authApi = {
 export const storeApi = {
   create: (data: { name: string; slug: string; address?: string; phone?: string }) => request('/admin/stores', { method: 'POST', body: JSON.stringify(data) }),
   list: () => request('/admin/stores'),
-  update: (id: string, data: Record<string, unknown>) => request(`/admin/stores/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  update: (slug: string, data: Record<string, unknown>) => request(`/admin/stores/${slug}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (slug: string) => request(`/admin/stores/${slug}`, { method: 'DELETE' }),
   getTheme: (slug: string) => request<{ name: string; theme: string }>(`/stores/${slug}/info`),
 };
 

@@ -35,6 +35,12 @@ class StoreRepository:
         await self.db.flush()
         return store
 
+    async def delete(self, store_id: UUID):
+        store = await self.find_by_id(store_id)
+        if store:
+            await self.db.delete(store)
+            await self.db.flush()
+
 
 class AdminRepository:
     def __init__(self, db: AsyncSession):

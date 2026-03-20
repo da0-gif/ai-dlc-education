@@ -29,6 +29,12 @@ async def update_store(req: StoreUpdate, store_id: UUID = Depends(resolve_store_
     return await svc.update_store(store_id, req.model_dump(exclude_unset=True))
 
 
+@router.delete("/api/admin/stores/{store_slug}")
+async def delete_store(store_id: UUID = Depends(resolve_store_id), svc: StoreService = Depends(get_store_service)):
+    await svc.delete_store(store_id)
+    return {"detail": "Deleted"}
+
+
 @router.get("/api/stores/{store_slug}/info")
 async def get_store_info(store_slug: str, svc: StoreService = Depends(get_store_service)):
     store = await svc.get_store_by_slug(store_slug)

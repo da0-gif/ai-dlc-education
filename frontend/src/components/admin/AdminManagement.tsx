@@ -195,24 +195,50 @@ export function TableManager() {
 export function StoreManager() {
   const [stores, setStores] = useState<{ id: string; name: string; slug: string; address?: string; phone?: string }[]>([]);
   const [form, setForm] = useState({ name: '', slug: '', address: '', phone: '' });
+  const [editSlug, setEditSlug] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
 
   const inputStyle: React.CSSProperties = { padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: 14, width: '100%' };
+  const btnStyle: React.CSSProperties = { padding: '6px 14px', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 };
 
   const load = useCallback(async () => {
     try { const res = await storeApi.list(); setStores(res as typeof stores); } catch { }
   }, []);
   useEffect(() => { load(); }, [load]);
 
+  const resetForm = () => { setForm({ name: '', slug: '', address: '', phone: '' }); setEditSlug(null); };
+
   const handleSubmit = async () => {
     if (!form.name || !form.slug) return;
     setMsg('');
     try {
-      await storeApi.create({ name: form.name, slug: form.slug, address: form.address || undefined, phone: form.phone || undefined });
-      setForm({ name: '', slug: '', address: '', phone: '' });
-      setMsg('매장이 등록되었습니다.');
+      if (editSlug) {
+        await storeApi.update(editSlug, { name: form.name, address: form.address || undefined, phone: form.phone || undefined });
+        setMsg('매장이 수정되었습니다.');
+      } else {
+        await storeApi.create({ name: form.name, slug: form.slug, address: form.address || undefined, phone: form.phone || undefined });
+        setMsg('매장이 등록되었습니다.');
+      }
+      resetForm();
       load();
-    } catch (err: unknown) { setMsg(err instanceof Error ? err.message : '등록 실패'); }
+    } catch (err: unknown) { setMsg(err instanceof Error ? err.message : '처리 실패'); }
+  };
+
+  const handleEdit = (s: typeof stores[0]) => {
+    setForm({ name: s.name, slug: s.slug, address: s.address || '', phone: s.phone || '' });
+    setEditSlug(s.slug);
+    setMsg('');
+  };
+
+  const handleDelete = async (slug: string) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    setMsg('');
+    try {
+      await storeApi.delete(slug);
+      setMsg('매장이 삭제되었습니다.');
+      if (editSlug === slug) resetForm();
+      load();
+    } catch (err: unknown) { setMsg(err instanceof Error ? err.message : '삭제 실패'); }
   };
 
   return (
@@ -222,17 +248,26 @@ export function StoreManager() {
       <div style={{ ...cardStyle, textAlign: 'left', marginBottom: 16, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="매장명" style={inputStyle} />
-          <input value={form.slug} onChange={e => setForm(p => ({ ...p, slug: e.target.value }))} placeholder="매장 식별자 (영문)" style={inputStyle} />
+          <input value={form.slug} onChange={e => setForm(p => ({ ...p, slug: e.target.value }))} placeholder="매장 식별자 (영문)" style={inputStyle} disabled={!!editSlug} />
         </div>
         <input value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} placeholder="주소 (선택)" style={inputStyle} />
         <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="전화번호 (선택)" style={inputStyle} />
-        <button onClick={handleSubmit} disabled={!form.name || !form.slug} style={{ padding: '10px 0', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 15, fontWeight: 700 }}>매장 등록</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={handleSubmit} disabled={!form.name || !form.slug} style={{ ...btnStyle, flex: 1, padding: '10px 0', background: 'var(--accent)', color: '#fff', fontSize: 15 }}>{editSlug ? '매장 수정' : '매장 등록'}</button>
+          {editSlug && <button onClick={resetForm} style={{ ...btnStyle, padding: '10px 16px', background: 'var(--bg-input)', color: 'var(--text-secondary)' }}>취소</button>}
+        </div>
       </div>
       {stores.map(s => (
-        <div key={s.id} style={{ ...cardStyle, textAlign: 'left', padding: 14, marginBottom: 8 }}>
-          <div style={{ color: 'var(--text-primary)', fontWeight: 'bold', marginBottom: 4 }}>{s.name} <span style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 'normal' }}>({s.slug})</span></div>
-          {s.address && <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>📍 {s.address}</div>}
-          {s.phone && <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>📞 {s.phone}</div>}
+        <div key={s.id} style={{ ...cardStyle, textAlign: 'left', padding: 14, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ color: 'var(--text-primary)', fontWeight: 'bold', marginBottom: 4 }}>{s.name} <span style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 'normal' }}>({s.slug})</span></div>
+            {s.address && <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>📍 {s.address}</div>}
+            {s.phone && <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>📞 {s.phone}</div>}
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+            <button onClick={() => handleEdit(s)} style={{ ...btnStyle, background: 'rgba(0,122,255,0.15)', color: '#007aff' }}>수정</button>
+            <button onClick={() => handleDelete(s.slug)} style={{ ...btnStyle, background: 'rgba(255,59,48,0.15)', color: '#ff3b30' }}>삭제</button>
+          </div>
         </div>
       ))}
       {stores.length === 0 && <div style={cardStyle}>등록된 매장이 없습니다.</div>}
