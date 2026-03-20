@@ -10,4 +10,9 @@ sse_service = SSEService()
 
 @router.get("/api/admin/stores/{store_slug}/orders/stream")
 async def sse_stream(store_id: UUID = Depends(resolve_store_id)):
-    return EventSourceResponse(sse_service.connect(store_id))
+    return EventSourceResponse(sse_service.connect(store_id), ping=15)
+
+
+@router.get("/api/stores/{store_slug}/stream")
+async def customer_sse_stream(store_id: UUID = Depends(resolve_store_id)):
+    return EventSourceResponse(sse_service.connect(store_id), ping=15)

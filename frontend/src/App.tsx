@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/auth/AuthProvider';
 import { ThemeProvider, useTheme } from './components/theme/ThemeProvider';
@@ -52,7 +52,8 @@ function CustomerNav({ cartCount }: { cartCount: number }) {
 
 function CustomerLayout() {
   const { auth } = useAuth();
-  const { loadStoreInfo } = useTheme();
+  const { loadStoreInfo, setTheme } = useTheme();
+  const esRef = useRef<EventSource | null>(null);
   const [cart, setCart] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem('cart');
     return saved ? JSON.parse(saved) : [];
@@ -61,6 +62,19 @@ function CustomerLayout() {
   useEffect(() => {
     if (auth.storeId) loadStoreInfo(auth.storeId);
   }, [auth.storeId, loadStoreInfo]);
+
+  useEffect(() => {
+    if (!auth.storeId) return;
+    const es = new EventSource(`/api/stores/${auth.storeId}/stream`);
+    esRef.current = es;
+    es.addEventListener('theme_changed', (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.theme) setTheme(data.theme);
+      } catch {}
+    });
+    return () => { es.close(); esRef.current = null; };
+  }, [auth.storeId, setTheme]);
 
   const saveCart = (items: CartItem[]) => { setCart(items); localStorage.setItem('cart', JSON.stringify(items)); };
 

@@ -6,6 +6,7 @@ from app.schemas import StoreCreate, StoreUpdate, StoreResponse
 from app.services.store_service import StoreService
 from app.repositories import StoreRepository
 from app.dependencies import resolve_store_id
+from app.routers.sse import sse_service
 
 router = APIRouter(tags=["stores"])
 
@@ -26,7 +27,11 @@ async def get_stores(svc: StoreService = Depends(get_store_service)):
 
 @router.put("/api/admin/stores/{store_slug}", response_model=StoreResponse)
 async def update_store(req: StoreUpdate, store_id: UUID = Depends(resolve_store_id), svc: StoreService = Depends(get_store_service)):
-    return await svc.update_store(store_id, req.model_dump(exclude_unset=True))
+    result = await svc.update_store(store_id, req.model_dump(exclude_unset=True))
+    data = req.model_dump(exclude_unset=True)
+    if "theme" in data:
+        await sse_service.broadcast(store_id, "theme_changed", {"theme": data["theme"]})
+    return result
 
 
 @router.delete("/api/admin/stores/{store_slug}")
