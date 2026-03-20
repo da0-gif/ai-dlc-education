@@ -132,6 +132,9 @@ class TableCreate(BaseModel):
     table_number: int
     password: str
 
+class TableUpdate(BaseModel):
+    password: Optional[str] = None
+
 class TableResponse(BaseModel):
     id: UUID
     table_number: int

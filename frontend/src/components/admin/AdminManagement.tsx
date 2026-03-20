@@ -96,17 +96,18 @@ export function MenuManager() {
 export function TableManager() {
   const { auth } = useAuth();
   const [tables, setTables] = useState<{ id: string; table_number: number }[]>([]);
-  const [sessions, setSessions] = useState<Record<string, boolean>>({});
+  const [activeTables, setActiveTables] = useState<string[]>([]);
   const [form, setForm] = useState({ table_number: '', password: '' });
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [history, setHistory] = useState<{ id: string; order_data: Record<string, unknown>; total_amount: number; completed_at: string }[]>([]);
-  const [orders, setOrders] = useState<{ id: string; order_number: number; status: string; total_amount: number; items: { id: string; menu_name: string; quantity: number; subtotal: number }[] }[]>([]);
+  const [editPw, setEditPw] = useState<{ id: string; pw: string } | null>(null);
   const [msg, setMsg] = useState('');
 
   const storeId = auth.storeId!;
   const load = useCallback(async () => {
-    const t = await tableApi.list(storeId) as typeof tables;
-    setTables(t);
+    const [t, a] = await Promise.all([tableApi.list(storeId), tableApi.active(storeId)]);
+    setTables(t as typeof tables);
+    setActiveTables(a as string[]);
   }, [storeId]);
   useEffect(() => { load(); }, [load]);
 
@@ -125,23 +126,30 @@ export function TableManager() {
     try {
       await tableApi.complete(storeId, tableId);
       setMsg('이용 완료 처리되었습니다.');
-      setSessions(p => ({ ...p, [tableId]: false }));
-      if (selectedTable === tableId) { setOrders([]); }
       load();
     } catch (err: unknown) { setMsg(err instanceof Error ? err.message : '처리 실패'); }
   };
 
-  const handleDeleteOrder = async (orderId: string) => {
+  const handleDelete = async (tableId: string) => {
     try {
-      await orderApi.delete(orderId);
-      setOrders(prev => prev.filter(o => o.id !== orderId));
-      setMsg('주문이 삭제되었습니다.');
+      await tableApi.delete(storeId, tableId);
+      setMsg('테이블이 삭제되었습니다.');
+      if (selectedTable === tableId) { setSelectedTable(null); setHistory([]); }
+      load();
     } catch (err: unknown) { setMsg(err instanceof Error ? err.message : '삭제 실패'); }
+  };
+
+  const handleUpdatePw = async () => {
+    if (!editPw || !editPw.pw) return;
+    try {
+      await tableApi.updatePassword(storeId, editPw.id, editPw.pw);
+      setMsg('비밀번호가 변경되었습니다.');
+      setEditPw(null);
+    } catch (err: unknown) { setMsg(err instanceof Error ? err.message : '변경 실패'); }
   };
 
   const viewHistory = async (tableId: string) => {
     setSelectedTable(tableId);
-    setOrders([]);
     const h = await tableApi.history(storeId, tableId) as typeof history;
     setHistory(h);
   };
@@ -159,16 +167,31 @@ export function TableManager() {
         <button onClick={handleCreate} disabled={!form.table_number || !form.password} style={{ padding: '8px 16px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: 700 }}>등록</button>
       </div>
 
+      {editPw && (
+        <div style={{ ...cardStyle, textAlign: 'left', marginBottom: 16, padding: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>테이블 {tables.find(t => t.id === editPw.id)?.table_number} 비밀번호</span>
+          <input value={editPw.pw} onChange={e => setEditPw(p => p ? { ...p, pw: e.target.value } : p)} placeholder="새 비밀번호" type="password" style={{ ...inputStyle, flex: 1 }} />
+          <button onClick={handleUpdatePw} style={{ padding: '8px 16px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: 700 }}>변경</button>
+          <button onClick={() => setEditPw(null)} style={{ padding: '8px 16px', background: 'var(--btn-secondary)', color: 'var(--btn-secondary-text)', border: 'none', borderRadius: 6, cursor: 'pointer' }}>취소</button>
+        </div>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
-        {tables.map(t => (
-          <div key={t.id} style={{ ...cardStyle, padding: 16, textAlign: 'center' }}>
-            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{t.table_number}</div>
-            <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => handleComplete(t.id)} style={{ padding: '6px 12px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>이용완료</button>
-              <button onClick={() => viewHistory(t.id)} style={{ padding: '6px 12px', background: 'var(--btn-secondary)', color: 'var(--btn-secondary-text)', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>과거내역</button>
+        {tables.map(t => {
+          const isActive = activeTables.includes(t.id);
+          return (
+            <div key={t.id} style={{ ...cardStyle, padding: 16, textAlign: 'center' }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{t.table_number}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 10, padding: '3px 10px', borderRadius: 12, display: 'inline-block', background: isActive ? 'rgba(48,209,88,0.15)' : 'var(--btn-secondary)', color: isActive ? '#30d158' : 'var(--text-muted)' }}>{isActive ? '이용중' : '비어있음'}</div>
+              <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
+                {isActive && <button onClick={() => handleComplete(t.id)} style={{ padding: '6px 10px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>이용 완료하기</button>}
+                <button onClick={() => viewHistory(t.id)} style={{ padding: '6px 10px', background: 'var(--btn-secondary)', color: 'var(--btn-secondary-text)', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>내역</button>
+                <button onClick={() => setEditPw({ id: t.id, pw: '' })} style={{ padding: '6px 10px', background: 'var(--btn-secondary)', color: 'var(--btn-secondary-text)', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>비번</button>
+                {!isActive && <button onClick={() => handleDelete(t.id)} style={{ padding: '6px 10px', background: 'rgba(255,59,48,0.12)', color: '#ff3b30', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>삭제</button>}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         {tables.length === 0 && <div style={{ ...cardStyle, gridColumn: '1/-1' }}>등록된 테이블이 없습니다.</div>}
       </div>
 
@@ -185,9 +208,7 @@ export function TableManager() {
           ))}
         </div>
       )}
-      {selectedTable && history.length === 0 && (
-        <div style={cardStyle}>과거 내역이 없습니다.</div>
-      )}
+      {selectedTable && history.length === 0 && <div style={cardStyle}>과거 내역이 없습니다.</div>}
     </div>
   );
 }

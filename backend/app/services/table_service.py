@@ -52,3 +52,21 @@ class TableService:
 
     async def get_order_history(self, store_id: UUID, table_id: UUID, date_filter: Optional[date] = None):
         return await self.order_history_repo.find_by_table(store_id, table_id, date_filter)
+
+    async def delete_table(self, table_id: UUID):
+        session = await self.session_repo.find_active_by_table(table_id)
+        if session:
+            raise BusinessError("Cannot delete table with active session")
+        await self.table_repo.delete(table_id)
+
+    async def update_table_password(self, table_id: UUID, password: str):
+        return await self.table_repo.update(table_id, {"password": password})
+
+    async def get_active_tables(self, store_id: UUID) -> list[UUID]:
+        tables = await self.table_repo.find_by_store(store_id)
+        active = []
+        for t in tables:
+            session = await self.session_repo.find_active_by_table(t.id)
+            if session:
+                active.append(t.id)
+        return active

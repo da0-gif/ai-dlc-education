@@ -156,6 +156,16 @@ class TableRepository:
     async def find_by_id(self, id: UUID) -> Optional[Table]:
         return await self.db.get(Table, id)
 
+    async def update(self, table_id: UUID, data: dict) -> Table:
+        table = await self.find_by_id(table_id)
+        for k, v in data.items():
+            setattr(table, k, v)
+        await self.db.flush()
+        return table
+
+    async def delete(self, id: UUID):
+        await self.db.execute(delete(Table).where(Table.id == id))
+
 
 class SessionRepository:
     def __init__(self, db: AsyncSession):

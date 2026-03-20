@@ -67,6 +67,11 @@ export const tableApi = {
     request(`/admin/stores/${storeId}/tables/${tableId}/complete`, { method: 'POST' }),
   history: (storeId: string, tableId: string, date?: string) =>
     request(`/admin/stores/${storeId}/tables/${tableId}/history${date ? `?date=${date}` : ''}`),
+  delete: (storeId: string, tableId: string) =>
+    request(`/admin/stores/${storeId}/tables/${tableId}`, { method: 'DELETE' }),
+  updatePassword: (storeId: string, tableId: string, password: string) =>
+    request(`/admin/stores/${storeId}/tables/${tableId}`, { method: 'PUT', body: JSON.stringify({ password }) }),
+  active: (storeId: string) => request(`/admin/stores/${storeId}/tables/active`),
 };
 
 // Parking

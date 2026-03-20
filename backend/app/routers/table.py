@@ -4,7 +4,7 @@ from datetime import date
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
-from app.schemas import TableCreate, TableResponse, OrderHistoryResponse
+from app.schemas import TableCreate, TableUpdate, TableResponse, OrderHistoryResponse
 from app.services.table_service import TableService
 from app.services.sse_service import SSEService
 from app.repositories import (TableRepository, SessionRepository, OrderRepository,
@@ -46,3 +46,21 @@ async def get_order_history(
     store_id: UUID = Depends(resolve_store_id), svc: TableService = Depends(get_table_service),
 ):
     return await svc.get_order_history(store_id, table_id, date)
+
+
+@router.delete("/tables/{table_id}")
+async def delete_table(table_id: UUID, svc: TableService = Depends(get_table_service)):
+    await svc.delete_table(table_id)
+    return {"ok": True}
+
+
+@router.put("/tables/{table_id}")
+async def update_table(table_id: UUID, req: TableUpdate, svc: TableService = Depends(get_table_service)):
+    if req.password:
+        await svc.update_table_password(table_id, req.password)
+    return {"ok": True}
+
+
+@router.get("/tables/active")
+async def get_active_tables(store_id: UUID = Depends(resolve_store_id), svc: TableService = Depends(get_table_service)):
+    return await svc.get_active_tables(store_id)
