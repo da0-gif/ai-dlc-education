@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1024">
+<title>t 오더 - 프로토타입</title>
+<style>
+  :root {
+    --bg-primary: #1a1a1a; --bg-secondary: #222; --bg-card: #2a2a2a; --bg-header: #111;
+    --bg-input: #333; --border: #333; --border-input: #555;
+    --text-primary: #fff; --text-secondary: #ccc; --text-muted: #888; --text-dim: #666;
+    --accent: #e53935; --accent-hover: #c62828;
+    --btn-secondary: #444; --btn-secondary-text: #ccc;
+  }
+  :root.light {
+    --bg-primary: #f5f5f5; --bg-secondary: #fff; --bg-card: #fff; --bg-header: #fff;
+    --bg-input: #f0f0f0; --border: #e0e0e0; --border-input: #ccc;
+    --text-primary: #212121; --text-secondary: #424242; --text-muted: #757575; --text-dim: #9e9e9e;
+    --accent: #d32f2f; --accent-hover: #b71c1c;
+    --btn-secondary: #e0e0e0; --btn-secondary-text: #424242;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); -webkit-font-smoothing: antialiased; overflow: hidden; height: 100vh; }
+  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: var(--bg-secondary); } ::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 3px; }
+  .header { display: flex; align-items: center; justify-content: space-between; background: var(--bg-header); padding: 0 16px; height: 56px; border-bottom: 1px solid var(--border); }
+  .logo { color: var(--accent); font-size: 24px; font-weight: bold; }
+  .table-badge { background: var(--accent); color: #fff; border-radius: 8px; padding: 4px 14px; text-align: center; }
+  .table-badge .label { font-size: 10px; line-height: 1; } .table-badge .number { font-size: 26px; font-weight: bold; line-height: 1.2; }
+  .main { display: flex; height: calc(100vh - 56px - 60px); }
+  .sidebar { width: 120px; flex-shrink: 0; background: var(--bg-primary); border-right: 1px solid var(--border); overflow-y: auto; padding: 8px 0; }
+  .sidebar button { width: 100%; padding: 14px 8px; border: none; cursor: pointer; font-size: 15px; font-weight: bold; background: transparent; color: var(--text-secondary); border-left: 4px solid transparent; transition: all 0.15s; }
+  .sidebar button:hover { background: var(--bg-card); }
+  .sidebar button.active { background: var(--accent); color: #fff; border-left-color: var(--accent); }
+  .menu-area { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg-secondary); }
+  .menu-area h2 { color: var(--text-primary); margin: 0 0 16px; font-size: 22px; }
+  .menu-area h2 span { color: var(--text-muted); font-size: 14px; margin-left: 8px; }
+  .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .menu-card { background: var(--bg-card); border-radius: 12px; overflow: hidden; cursor: pointer; position: relative; transition: transform 0.15s; border: 1px solid var(--border); }
+  .menu-card:hover { transform: scale(1.03); }
+  .menu-card.soldout { cursor: default; } .menu-card.soldout:hover { transform: none; }
+  .menu-img { position: relative; width: 100%; padding-top: 75%; background: var(--bg-input); }
+  .menu-img .placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-dim); font-size: 40px; }
+  .soldout-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; }
+  .soldout-overlay span { color: var(--accent); font-size: 22px; font-weight: bold; border: 3px solid var(--accent); padding: 4px 16px; border-radius: 4px; transform: rotate(-15deg); }
+  .cart-badge { position: absolute; top: 8px; right: 8px; background: var(--accent); color: #fff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; }
+  .menu-badge { position: absolute; bottom: 8px; left: 8px; display: flex; gap: 4px; }
+  .menu-badge span { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+  .badge-rec { background: #1565C0; color: #fff; } .badge-hit { background: #E65100; color: #fff; } .badge-best { background: #C62828; color: #fff; }
+  .menu-info { padding: 10px 12px 14px; }
+  .menu-name { color: var(--text-primary); font-size: 16px; font-weight: bold; margin-bottom: 4px; }
+  .menu-price { color: var(--text-primary); font-size: 18px; font-weight: bold; }
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--bg-header); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+  .bottom-nav a { display: flex; align-items: center; gap: 6px; padding: 10px 20px; color: var(--text-muted); text-decoration: none; font-size: 15px; position: relative; cursor: pointer; }
+  .bottom-nav a.active { color: var(--text-primary); font-weight: bold; }
+  .bottom-nav .nav-badge { position: absolute; top: 2px; right: 6px; background: var(--accent); color: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
+  .page { display: none; } .page.active { display: block; }
+  .cart-page { background: var(--bg-secondary); min-height: calc(100vh - 56px - 60px); padding: 20px; }
+  .cart-empty { display: flex; align-items: center; justify-content: center; height: calc(100vh - 56px - 60px); background: var(--bg-secondary); text-align: center; color: var(--text-muted); }
+  .cart-card { background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .cart-item:last-child { border-bottom: none; }
+  .cart-item-name { color: var(--text-primary); font-size: 16px; font-weight: bold; }
+  .cart-item-price { color: var(--text-muted); font-size: 14px; margin-top: 2px; }
+  .cart-controls { display: flex; align-items: center; gap: 8px; }
+  .qty-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border-input); background: transparent; color: var(--text-primary); font-size: 18px; cursor: pointer; }
+  .qty-num { color: var(--text-primary); font-size: 18px; min-width: 30px; text-align: center; }
+  .cart-subtotal { color: var(--text-primary); font-size: 16px; font-weight: bold; min-width: 80px; text-align: right; }
+  .remove-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--btn-secondary); color: var(--accent); font-size: 16px; cursor: pointer; }
+  .cart-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+  .clear-btn { padding: 12px 24px; background: var(--btn-secondary); color: var(--btn-secondary-text); border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+  .cart-total { color: var(--text-primary); font-size: 22px; font-weight: bold; }
+  .order-btn { width: 100%; margin-top: 16px; padding: 18px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; }
+  .order-page { background: var(--bg-secondary); min-height: calc(100vh - 56px - 60px); padding: 20px; }
+  .order-card { background: var(--bg-card); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
+  .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .order-num { color: var(--text-primary); font-size: 16px; font-weight: bold; }
+  .status-badge { padding: 4px 12px; border-radius: 20px; color: #fff; font-size: 13px; font-weight: bold; }
+  .status-pending { background: #757575; } .status-preparing { background: #FF9800; } .status-completed { background: #4CAF50; }
+  .order-time { color: var(--text-dim); font-size: 13px; margin-bottom: 10px; }
+  .order-item-row { display: flex; justify-content: space-between; padding: 4px 0; color: var(--text-secondary); font-size: 14px; }
+  .order-total { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 8px; text-align: right; color: var(--text-primary); font-size: 18px; font-weight: bold; }
+  .parking-page { background: var(--bg-secondary); min-height: calc(100vh - 56px - 60px); display: flex; align-items: center; justify-content: center; }
+  .parking-card { background: var(--bg-card); border-radius: 16px; padding: 32px; width: 400px; max-width: 90%; border: 1px solid var(--border); }
+  .parking-card h2 { color: var(--text-primary); text-align: center; margin-bottom: 8px; }
+  .parking-card .sub { color: var(--text-muted); text-align: center; font-size: 14px; margin-bottom: 24px; }
+  .parking-card input { width: 100%; padding: 14px; font-size: 18px; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 8px; color: var(--text-primary); text-align: center; margin-bottom: 12px; box-sizing: border-box; }
+  .parking-card input::placeholder { color: var(--text-dim); }
+  .parking-card button { width: 100%; padding: 16px; font-size: 18px; font-weight: bold; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+  .parking-existing { background: var(--bg-input); padding: 10px 16px; border-radius: 8px; margin-bottom: 16px; color: var(--text-secondary); font-size: 14px; }
+  .parking-existing strong { color: var(--text-primary); }
+  /* Theme toggle */
+  .theme-toggle { display: flex; align-items: center; gap: 8px; margin-left: 16px; }
+  .theme-toggle button { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; cursor: pointer; }
+  .theme-toggle button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .theme-toggle button:not(.active) { background: var(--btn-secondary); color: var(--btn-secondary-text); }
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="logo">t 오더</div>
+    <div class="theme-toggle">
+      <button id="btn-dark" class="active" onclick="setTheme('dark')">🌙 다크</button>
+      <button id="btn-light" onclick="setTheme('light')">☀️ 라이트</button>
+    </div>
+  </div>
+  <div class="table-badge"><div class="label">테이블번호</div><div class="number">12</div></div>
+</div>
+
+<div id="page-menu" class="page active">
+  <div class="main">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="menu-area">
+      <h2 id="category-title">전체메뉴 <span id="menu-count"></span></h2>
+      <div class="menu-grid" id="menu-grid"></div>
+    </main>
+  </div>
+</div>
+
+<div id="page-cart" class="page"><div id="cart-content"></div></div>
+
+<div id="page-orders" class="page">
+  <div class="order-page">
+    <h2 style="color:var(--text-primary);margin:0 0 16px">주문 내역</h2>
+    <div class="order-card"><div class="order-header"><span class="order-num">주문 #3</span><span class="status-badge status-completed">완료</span></div><div class="order-time">2026. 3. 20. 오후 1:30:00</div><div class="order-item-row"><span>마늘쫑닭(반마리) × 2</span><span>15,800원</span></div><div class="order-item-row"><span>치즈닭(반마리) × 1</span><span>7,900원</span></div><div class="order-total">23,700원</div></div>
+    <div class="order-card"><div class="order-header"><span class="order-num">주문 #2</span><span class="status-badge status-preparing">준비중</span></div><div class="order-time">2026. 3. 20. 오후 1:25:00</div><div class="order-item-row"><span>파품닭(반마리) × 1</span><span>7,900원</span></div><div class="order-item-row"><span>콜라 × 2</span><span>4,000원</span></div><div class="order-total">11,900원</div></div>
+    <div class="order-card"><div class="order-header"><span class="order-num">주문 #1</span><span class="status-badge status-pending">대기중</span></div><div class="order-time">2026. 3. 20. 오후 1:20:00</div><div class="order-item-row"><span>누룽지통닭 × 1</span><span>18,900원</span></div><div class="order-total">18,900원</div></div>
+  </div>
+</div>
+
+<div id="page-parking" class="page">
+  <div class="parking-page"><div class="parking-card">
+    <h2>🅿️ 무료 주차 등록</h2><p class="sub">완료된 주문이 있어야 등록 가능합니다</p>
+    <div class="parking-existing">현재 등록: <strong>12가3456</strong></div>
+    <input placeholder="차량 번호 (예: 12가3456)" value="12가3456"><button>수정하기</button>
+  </div></div>
+</div>
+
+<div class="bottom-nav">
+  <a class="active" onclick="showPage('menu',this)">🍽️ 메뉴</a>
+  <a onclick="showPage('orders',this)">📋 주문내역</a>
+  <a onclick="showPage('parking',this)">🅿️ 주차등록</a>
+  <a onclick="showPage('cart',this)" id="nav-cart">🛒 장바구니 <span class="nav-badge" id="cart-count">3</span></a>
+</div>
+
+<script>
+const categories=[{id:'c1',name:'안주'},{id:'c2',name:'주류'},{id:'c3',name:'음료'},{id:'c4',name:'추가메뉴'},{id:'c5',name:'포장할인'}];
+const menus=[
+  {id:'m1',name:'마늘쫑닭(반마리)',price:7900,category_id:'c1',is_sold_out:false,badge:'rec'},
+  {id:'m2',name:'치즈닭(반마리)',price:7900,category_id:'c1',is_sold_out:false,badge:'hit,best'},
+  {id:'m3',name:'파품닭(반마리)',price:7900,category_id:'c1',is_sold_out:true,badge:''},
+  {id:'m4',name:'누룽지통닭',price:18900,category_id:'c1',is_sold_out:false,badge:''},
+  {id:'m5',name:'양념치킨',price:19900,category_id:'c1',is_sold_out:false,badge:'best'},
+  {id:'m6',name:'간장치킨',price:19900,category_id:'c1',is_sold_out:false,badge:''},
+  {id:'m7',name:'생맥주 500ml',price:5000,category_id:'c2',is_sold_out:false,badge:'hit'},
+  {id:'m8',name:'소주',price:5000,category_id:'c2',is_sold_out:false,badge:''},
+  {id:'m9',name:'콜라',price:2000,category_id:'c3',is_sold_out:false,badge:''},
+  {id:'m10',name:'사이다',price:2000,category_id:'c3',is_sold_out:false,badge:''},
+];
+const emojis=['🍗','🍖','🍕','🥘','🍜','🍛','🍺','🍶','🥤','🧃'];
+let cart={m1:2,m5:1},activeCat=null;
+
+function setTheme(t){
+  if(t==='light')document.documentElement.classList.add('light');
+  else document.documentElement.classList.remove('light');
+  document.getElementById('btn-dark').className=t==='dark'?'active':'';
+  document.getElementById('btn-light').className=t==='light'?'active':'';
+  localStorage.setItem('theme',t);
+}
+(function(){var t=localStorage.getItem('theme');if(t)setTheme(t);})();
+
+function renderSidebar(){
+  const sb=document.getElementById('sidebar');
+  let h=`<button class="${!activeCat?'active':''}" onclick="filterCat(null)">전체</button>`;
+  categories.forEach(c=>{h+=`<button class="${activeCat===c.id?'active':''}" onclick="filterCat('${c.id}')">${c.name}</button>`;});
+  sb.innerHTML=h;
+}
+function renderMenus(){
+  const f=activeCat?menus.filter(m=>m.category_id===activeCat):menus;
+  const cn=activeCat?categories.find(c=>c.id===activeCat)?.name:'전체메뉴';
+  document.getElementById('category-title').innerHTML=`${cn} <span>${f.length}개</span>`;
+  document.getElementById('menu-grid').innerHTML=f.map((m,i)=>{
+    const badges=m.badge?m.badge.split(',').map(b=>b==='rec'?'<span class="badge-rec">👍 추천</span>':b==='hit'?'<span class="badge-hit">★ HIT</span>':b==='best'?'<span class="badge-best">🔥 BEST</span>':'').join(''):'';
+    const cq=cart[m.id]||0;
+    return `<div class="menu-card ${m.is_sold_out?'soldout':''}" onclick="${m.is_sold_out?'':`addToCart('${m.id}')`}"><div class="menu-img"><div class="placeholder">${emojis[i%emojis.length]}</div>${m.is_sold_out?'<div class="soldout-overlay"><span>SOLD OUT</span></div>':''}${cq?`<div class="cart-badge">${cq}</div>`:''}${badges?`<div class="menu-badge">${badges}</div>`:''}</div><div class="menu-info"><div class="menu-name">${m.name}</div><div class="menu-price">${m.price.toLocaleString()}원</div></div></div>`;
+  }).join('');
+}
+function renderCart(){
+  const items=Object.entries(cart).map(([id,qty])=>{const m=menus.find(x=>x.id===id);return m?{...m,qty,subtotal:m.price*qty}:null;}).filter(Boolean);
+  const el=document.getElementById('cart-content');
+  if(!items.length){el.innerHTML='<div class="cart-empty"><div><div style="font-size:48px;margin-bottom:12px">🛒</div><p style="font-size:18px">장바구니가 비어있습니다.</p></div></div>';return;}
+  const total=items.reduce((s,i)=>s+i.subtotal,0);
+  el.innerHTML=`<div class="cart-page"><h2 style="color:var(--text-primary);margin:0 0 16px">장바구니</h2><div class="cart-card">${items.map(i=>`<div class="cart-item"><div><div class="cart-item-name">${i.name}</div><div class="cart-item-price">${i.price.toLocaleString()}원</div></div><div class="cart-controls"><button class="qty-btn" onclick="updateQty('${i.id}',-1)">−</button><span class="qty-num">${i.qty}</span><button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button><span class="cart-subtotal">${i.subtotal.toLocaleString()}원</span><button class="remove-btn" onclick="removeItem('${i.id}')">✕</button></div></div>`).join('')}</div><div class="cart-footer"><button class="clear-btn" onclick="clearCart()">전체삭제</button><div class="cart-total">합계 ${total.toLocaleString()}원</div></div><button class="order-btn" onclick="placeOrder()">주문하기 (${items.length}건)</button></div>`;
+}
+function updateCartBadge(){const t=Object.values(cart).reduce((s,q)=>s+q,0);const el=document.getElementById('cart-count');el.textContent=t;el.style.display=t>0?'flex':'none';}
+function filterCat(id){activeCat=id;renderSidebar();renderMenus();}
+function addToCart(id){cart[id]=(cart[id]||0)+1;renderMenus();renderCart();updateCartBadge();}
+function updateQty(id,d){cart[id]=(cart[id]||0)+d;if(cart[id]<=0)delete cart[id];renderMenus();renderCart();updateCartBadge();}
+function removeItem(id){delete cart[id];renderMenus();renderCart();updateCartBadge();}
+function clearCart(){cart={};renderMenus();renderCart();updateCartBadge();}
+function placeOrder(){alert('주문이 완료되었습니다!');clearCart();showPage('orders',document.querySelectorAll('.bottom-nav a')[1]);}
+function showPage(name,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');document.querySelectorAll('.bottom-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(name==='cart')renderCart();}
+renderSidebar();renderMenus();updateCartBadge();
+</script>
+</body>
+</html>

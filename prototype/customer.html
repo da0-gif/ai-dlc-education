@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>테이블오더 - 고객용</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f5f5f5; max-width:768px; margin:0 auto; }
+header { background:#1976D2; color:#fff; padding:16px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; }
+header h1 { font-size:18px; }
+.badge { background:#FF5722; color:#fff; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold; }
+nav { display:flex; gap:8px; padding:12px 16px; background:#fff; overflow-x:auto; border-bottom:1px solid #e0e0e0; position:sticky; top:56px; z-index:99; }
+nav button { padding:10px 20px; border:none; border-radius:20px; font-size:14px; cursor:pointer; white-space:nowrap; min-height:44px; min-width:44px; background:#e0e0e0; }
+nav button.active { background:#1976D2; color:#fff; }
+.tab-bar { display:flex; position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:768px; background:#fff; border-top:1px solid #e0e0e0; z-index:100; }
+.tab-bar button { flex:1; padding:12px 0; border:none; background:none; font-size:12px; cursor:pointer; min-height:56px; color:#757575; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.tab-bar button.active { color:#1976D2; }
+.tab-bar button span.icon { font-size:20px; }
+
+/* Pages */
+.page { display:none; padding:16px; padding-bottom:80px; }
+.page.active { display:block; }
+
+/* Menu Grid */
+.menu-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.menu-card { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); cursor:pointer; }
+.menu-card img { width:100%; height:140px; object-fit:cover; background:#e0e0e0; }
+.menu-card .info { padding:12px; }
+.menu-card .name { font-size:15px; font-weight:600; margin-bottom:4px; }
+.menu-card .desc { font-size:12px; color:#757575; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.menu-card .price { font-size:16px; font-weight:700; color:#1976D2; }
+.menu-card .add-btn { width:100%; padding:10px; border:none; background:#1976D2; color:#fff; font-size:14px; cursor:pointer; min-height:44px; }
+
+/* Cart */
+.cart-item { background:#fff; border-radius:8px; padding:16px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+.cart-item .item-info .item-name { font-size:15px; font-weight:600; }
+.cart-item .item-info .item-price { font-size:13px; color:#757575; margin-top:4px; }
+.cart-controls { display:flex; align-items:center; gap:12px; }
+.cart-controls button { width:36px; height:36px; border-radius:50%; border:1px solid #e0e0e0; background:#fff; font-size:18px; cursor:pointer; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center; }
+.cart-controls span { font-size:16px; font-weight:600; min-width:24px; text-align:center; }
+.cart-summary { background:#fff; border-radius:12px; padding:20px; margin-top:16px; }
+.cart-summary .total { display:flex; justify-content:space-between; font-size:18px; font-weight:700; margin-bottom:16px; }
+.order-btn { width:100%; padding:16px; border:none; border-radius:8px; background:#FF5722; color:#fff; font-size:16px; font-weight:700; cursor:pointer; min-height:52px; }
+.empty-cart { text-align:center; padding:60px 20px; color:#757575; }
+
+/* Orders */
+.order-card { background:#fff; border-radius:12px; padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
+.order-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.order-number { font-size:14px; font-weight:700; }
+.order-status { padding:4px 12px; border-radius:12px; font-size:12px; font-weight:600; }
+.status-waiting { background:#FFF3E0; color:#E65100; }
+.status-preparing { background:#E3F2FD; color:#1565C0; }
+.status-done { background:#E8F5E9; color:#2E7D32; }
+.order-items { border-top:1px solid #f0f0f0; padding-top:8px; }
+.order-item-row { display:flex; justify-content:space-between; padding:4px 0; font-size:14px; }
+.order-total { border-top:1px solid #f0f0f0; padding-top:8px; margin-top:8px; display:flex; justify-content:space-between; font-weight:700; }
+.order-time { font-size:12px; color:#757575; }
+
+/* Modal */
+.modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; }
+.modal-overlay.show { display:flex; }
+.modal { background:#fff; border-radius:16px; padding:24px; margin:20px; max-width:400px; width:100%; text-align:center; }
+.modal h2 { margin-bottom:8px; font-size:20px; }
+.modal .order-num { font-size:32px; font-weight:700; color:#1976D2; margin:16px 0; }
+.modal p { color:#757575; font-size:14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍽️ 맛있는 식당 - 테이블 3</h1>
+  <div class="badge" id="cartBadge">3</div>
+</header>
+
+<nav>
+  <button class="active">전체</button>
+  <button>추천메뉴</button>
+  <button>메인요리</button>
+  <button>사이드</button>
+  <button>음료</button>
+  <button>디저트</button>
+</nav>
+
+<!-- Menu Page -->
+<div class="page active" id="menuPage">
+  <div class="menu-grid">
+    <div class="menu-card">
+      <div style="width:100%;height:140px;background:linear-gradient(135deg,#ff9a56,#ff6b6b);display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px;">🍖</div>
+      <div class="info">
+        <div class="name">숯불 갈비</div>
+        <div class="desc">국내산 한우 갈비를 숯불에 구워낸 시그니처 메뉴</div>
+        <div class="price">₩32,000</div>
+      </div>
+      <button class="add-btn">담기</button>
+    </div>
+    <div class="menu-card">
+      <div style="width:100%;height:140px;background:linear-gradient(135deg,#a8e063,#56ab2f);display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px;">🥘</div>
+      <div class="info">
+        <div class="name">된장찌개</div>
+        <div class="desc">전통 방식으로 끓인 구수한 된장찌개</div>
+        <div class="price">₩9,000</div>
+      </div>
+      <button class="add-btn">담기</button>
+    </div>
+    <div class="menu-card">
+      <div style="width:100%;height:140px;background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px;">🍜</div>
+      <div class="info">
+        <div class="name">냉면</div>
+        <div class="desc">시원한 육수에 쫄깃한 면발의 물냉면</div>
+        <div class="price">₩11,000</div>
+      </div>
+      <button class="add-btn">담기</button>
+    </div>
+    <div class="menu-card">
+      <div style="width:100%;height:140px;background:linear-gradient(135deg,#4facfe,#00f2fe);display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px;">🥤</div>
+      <div class="info">
+        <div class="name">콜라</div>
+        <div class="desc">시원한 탄산음료</div>
+        <div class="price">₩3,000</div>
+      </div>
+      <button class="add-btn">담기</button>
+    </div>
+    <div class="menu-card">
+      <div style="width:100%;height:140px;background:linear-gradient(135deg,#ffecd2,#fcb69f);display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px;">🍚</div>
+      <div class="info">
+        <div class="name">공기밥</div>
+        <div class="desc">갓 지은 따뜻한 쌀밥</div>
+        <div class="price">₩1,000</div>
+      </div>
+      <button class="add-btn">담기</button>
+    </div>
+    <div class="menu-card">
+      <div style="width:100%;height:140px;background:linear-gradient(135deg,#a18cd1,#fbc2eb);display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px;">🍰</div>
+      <div class="info">
+        <div class="name">치즈케이크</div>
+        <div class="desc">부드러운 뉴욕 스타일 치즈케이크</div>
+        <div class="price">₩7,000</div>
+      </div>
+      <button class="add-btn">담기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cart Page -->
+<div class="page" id="cartPage">
+  <h2 style="margin-bottom:16px; font-size:18px;">장바구니</h2>
+  <div class="cart-item">
+    <div class="item-info">
+      <div class="item-name">🍖 숯불 갈비</div>
+      <div class="item-price">₩32,000</div>
+    </div>
+    <div class="cart-controls">
+      <button>−</button>
+      <span>2</span>
+      <button>+</button>
+    </div>
+  </div>
+  <div class="cart-item">
+    <div class="item-info">
+      <div class="item-name">🥘 된장찌개</div>
+      <div class="item-price">₩9,000</div>
+    </div>
+    <div class="cart-controls">
+      <button>−</button>
+      <span>1</span>
+      <button>+</button>
+    </div>
+  </div>
+  <div class="cart-item">
+    <div class="item-info">
+      <div class="item-name">🥤 콜라</div>
+      <div class="item-price">₩3,000</div>
+    </div>
+    <div class="cart-controls">
+      <button>−</button>
+      <span>2</span>
+      <button>+</button>
+    </div>
+  </div>
+  <div class="cart-summary">
+    <div class="total">
+      <span>총 주문금액</span>
+      <span>₩79,000</span>
+    </div>
+    <button class="order-btn" onclick="showOrderModal()">주문하기</button>
+  </div>
+</div>
+
+<!-- Orders Page -->
+<div class="page" id="ordersPage">
+  <h2 style="margin-bottom:16px; font-size:18px;">주문 내역</h2>
+  <div class="order-card">
+    <div class="order-header">
+      <div>
+        <div class="order-number">주문 #1042</div>
+        <div class="order-time">11:32</div>
+      </div>
+      <span class="order-status status-preparing">준비중</span>
+    </div>
+    <div class="order-items">
+      <div class="order-item-row"><span>숯불 갈비 x2</span><span>₩64,000</span></div>
+      <div class="order-item-row"><span>된장찌개 x1</span><span>₩9,000</span></div>
+    </div>
+    <div class="order-total"><span>합계</span><span>₩73,000</span></div>
+  </div>
+  <div class="order-card">
+    <div class="order-header">
+      <div>
+        <div class="order-number">주문 #1043</div>
+        <div class="order-time">11:45</div>
+      </div>
+      <span class="order-status status-waiting">대기중</span>
+    </div>
+    <div class="order-items">
+      <div class="order-item-row"><span>콜라 x2</span><span>₩6,000</span></div>
+    </div>
+    <div class="order-total"><span>합계</span><span>₩6,000</span></div>
+  </div>
+</div>
+
+<!-- Order Success Modal -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <h2>✅ 주문 완료!</h2>
+    <div class="order-num">#1044</div>
+    <p>주문이 접수되었습니다.<br>5초 후 메뉴 화면으로 이동합니다.</p>
+  </div>
+</div>
+
+<!-- Bottom Tab Bar -->
+<div class="tab-bar">
+  <button class="active" onclick="showPage('menuPage',this)">
+    <span class="icon">📋</span>메뉴
+  </button>
+  <button onclick="showPage('cartPage',this)">
+    <span class="icon">🛒</span>장바구니
+  </button>
+  <button onclick="showPage('ordersPage',this)">
+    <span class="icon">📦</span>주문내역
+  </button>
+</div>
+
+<script>
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+function showOrderModal() {
+  document.getElementById('orderModal').classList.add('show');
+  setTimeout(() => {
+    document.getElementById('orderModal').classList.remove('show');
+    showPage('menuPage', document.querySelector('.tab-bar button'));
+  }, 3000);
+}
+</script>
+</body>
+</html>
