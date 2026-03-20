@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../auth/AuthProvider';
-import { menuApi, categoryApi } from '../../services/api';
+import { menuApi, categoryApi, storeApi } from '../../services/api';
 import { Menu, Category } from '../../types';
 
 const pageStyle: React.CSSProperties = { padding: 24 };
@@ -98,5 +98,49 @@ export function TableManager() {
 }
 
 export function StoreManager() {
-  return <div style={pageStyle}><h2 style={{ color: 'var(--text-primary)', marginBottom: 16 }}>매장 관리</h2><div style={cardStyle}>매장 등록 및 관리</div></div>;
+  const [stores, setStores] = useState<{ id: string; name: string; slug: string; address?: string; phone?: string }[]>([]);
+  const [form, setForm] = useState({ name: '', slug: '', address: '', phone: '' });
+  const [msg, setMsg] = useState('');
+
+  const inputStyle: React.CSSProperties = { padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: 14, width: '100%' };
+
+  const load = useCallback(async () => {
+    try { const res = await storeApi.list(); setStores(res as typeof stores); } catch { }
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const handleSubmit = async () => {
+    if (!form.name || !form.slug) return;
+    setMsg('');
+    try {
+      await storeApi.create({ name: form.name, slug: form.slug, address: form.address || undefined, phone: form.phone || undefined });
+      setForm({ name: '', slug: '', address: '', phone: '' });
+      setMsg('매장이 등록되었습니다.');
+      load();
+    } catch (err: unknown) { setMsg(err instanceof Error ? err.message : '등록 실패'); }
+  };
+
+  return (
+    <div style={pageStyle}>
+      <h2 style={{ color: 'var(--text-primary)', marginBottom: 16 }}>매장 관리</h2>
+      {msg && <div style={{ padding: '10px 16px', borderRadius: 8, marginBottom: 16, fontSize: 14, background: msg.includes('실패') ? 'rgba(255,59,48,0.15)' : 'rgba(48,209,88,0.15)', color: msg.includes('실패') ? '#ff3b30' : '#30d158' }}>{msg}</div>}
+      <div style={{ ...cardStyle, textAlign: 'left', marginBottom: 16, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="매장명" style={inputStyle} />
+          <input value={form.slug} onChange={e => setForm(p => ({ ...p, slug: e.target.value }))} placeholder="매장 식별자 (영문)" style={inputStyle} />
+        </div>
+        <input value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} placeholder="주소 (선택)" style={inputStyle} />
+        <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="전화번호 (선택)" style={inputStyle} />
+        <button onClick={handleSubmit} disabled={!form.name || !form.slug} style={{ padding: '10px 0', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 15, fontWeight: 700 }}>매장 등록</button>
+      </div>
+      {stores.map(s => (
+        <div key={s.id} style={{ ...cardStyle, textAlign: 'left', padding: 14, marginBottom: 8 }}>
+          <div style={{ color: 'var(--text-primary)', fontWeight: 'bold', marginBottom: 4 }}>{s.name} <span style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 'normal' }}>({s.slug})</span></div>
+          {s.address && <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>📍 {s.address}</div>}
+          {s.phone && <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>📞 {s.phone}</div>}
+        </div>
+      ))}
+      {stores.length === 0 && <div style={cardStyle}>등록된 매장이 없습니다.</div>}
+    </div>
+  );
 }

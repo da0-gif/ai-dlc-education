@@ -3,120 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>t 오더 - 관리자 화면</title>
+<title>송오더 - 관리자 화면</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif; background: #f2f2f7; color: #1c1c1e; -webkit-font-smoothing: antialiased; }
-
-  :root {
-    --glass: rgba(255,255,255,0.72);
-    --glass-border: rgba(255,255,255,0.45);
-    --glass-shadow: 0 2px 20px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(0,0,0,0.05);
-    --blur: saturate(180%) blur(20px);
-    --radius: 16px;
-    --radius-lg: 22px;
-    --accent: #007aff;
-    --accent-light: rgba(0,122,255,0.12);
-    --red: #ff3b30;
-    --green: #34c759;
-    --orange: #ff9500;
-    --gray1: #8e8e93;
-    --gray2: #aeaeb2;
-    --gray3: #c7c7cc;
-    --gray4: #d1d1d6;
-    --gray5: #e5e5ea;
-    --gray6: #f2f2f7;
-    --separator: rgba(60,60,67,0.1);
-    --label: #1c1c1e;
-    --label2: #3c3c43;
-    --label3: #8e8e93;
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',system-ui,sans-serif;background:#0a0a0c;color:rgba(255,255,255,0.95);-webkit-font-smoothing:antialiased}
+  :root{
+    --bg:#0a0a0c;--card:rgba(255,255,255,0.06);--header:rgba(255,255,255,0.04);--input:rgba(255,255,255,0.08);
+    --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.15);--accent:#0a84ff;
+    --glass-bg:rgba(255,255,255,0.06);--glass-border:rgba(255,255,255,0.12);--glass-shadow:0 8px 32px rgba(0,0,0,0.4);--glass-blur:blur(40px) saturate(180%);
+    --t1:rgba(255,255,255,0.95);--t2:rgba(255,255,255,0.7);--tm:rgba(255,255,255,0.4);--td:rgba(255,255,255,0.25);
+    --btn2:rgba(255,255,255,0.1);--btn2t:rgba(255,255,255,0.7);
+    --red:#ff453a;--green:#30d158;--orange:#ff9f0a;
   }
+  .glass{background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);box-shadow:var(--glass-shadow)}
 
-  .glass { background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
+  nav.top{display:flex;padding:0 16px;background:var(--header);border-bottom:1px solid var(--border);align-items:center;height:56px}
+  nav.top .logo{color:var(--accent);font-size:20px;font-weight:bold;margin-right:24px}
+  nav.top a{padding:16px 20px;color:var(--t2);font-size:15px;cursor:pointer;text-decoration:none}
+  nav.top a.active{color:var(--accent);border-bottom:2px solid var(--accent)}
+  nav.top .logout{margin-left:auto;padding:8px 20px;background:var(--btn2);color:var(--btn2t);border:none;border-radius:6px;font-size:14px;cursor:pointer}
 
-  nav.top { display: flex; align-items: center; height: 56px; padding: 0 20px; border-bottom: 0.5px solid var(--separator); border-radius: 0 0 var(--radius) var(--radius); position: sticky; top: 0; z-index: 50; }
-  nav.top .logo { color: var(--accent); font-size: 20px; font-weight: 700; margin-right: 28px; letter-spacing: -0.5px; }
-  nav.top a { padding: 16px 18px; color: var(--gray1); font-size: 15px; font-weight: 600; cursor: pointer; border-bottom: 2.5px solid transparent; transition: all 0.2s; }
-  nav.top a.active { color: var(--accent); border-bottom-color: var(--accent); }
-  nav.top .logout { margin-left: auto; padding: 8px 18px; background: var(--gray5); color: var(--label2); border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .tab{display:none}.tab.active{display:block}
+  .pad{padding:24px}
+  .pad h2{color:var(--t1);margin-bottom:16px;font-weight:700}
+  .ph-card{border-radius:12px;padding:32px;text-align:center;color:var(--tm)}
 
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-  .page-pad { padding: 24px; }
-  .page-pad h2 { font-size: 28px; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.5px; }
+  .dash-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .dash-h h2{margin:0}
+  .sse{display:flex;align-items:center;gap:6px;font-size:14px}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
-  /* Dashboard */
-  .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .dash-header h2 { margin: 0; }
-  .sse { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; }
-  .sse-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+  .stat{border-radius:16px;padding:20px}
+  .stat .lbl{color:var(--tm);font-size:13px;font-weight:600;margin-bottom:6px}
+  .stat .val{font-size:28px;font-weight:700;letter-spacing:-0.5px;color:var(--t1)}
+  .stat .sub{color:var(--td);font-size:12px;margin-top:4px}
 
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
-  .stat-card { border-radius: var(--radius); padding: 20px; }
-  .stat-card .lbl { color: var(--gray1); font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-  .stat-card .val { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
-  .stat-card .sub { color: var(--gray2); font-size: 12px; margin-top: 4px; }
-
-  .columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .col h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid var(--separator); display: flex; align-items: center; gap: 6px; }
-  .col h3 .cnt { background: var(--gray5); color: var(--gray1); border-radius: 10px; padding: 2px 8px; font-size: 12px; font-weight: 700; }
-  .dash-order { border-radius: 14px; padding: 14px; margin-bottom: 10px; }
-  .dash-order .top { display: flex; justify-content: space-between; margin-bottom: 6px; }
-  .dash-order .tbl { color: var(--accent); font-weight: 700; font-size: 14px; }
-  .dash-order .time { color: var(--gray2); font-size: 12px; }
-  .dash-order .items { color: var(--label2); font-size: 13px; }
-  .dash-order .items div { padding: 2px 0; }
-  .dash-order .bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--separator); }
-  .dash-order .amt { font-weight: 700; font-size: 15px; }
-  .pill-btn { padding: 7px 16px; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .col h3{font-size:16px;font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--border);color:var(--t1)}
+  .col h3 .cnt{background:var(--btn2);color:var(--tm);border-radius:10px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:6px}
+  .dorder{border-radius:14px;padding:14px;margin-bottom:10px}
+  .dorder .top{display:flex;justify-content:space-between;margin-bottom:6px}
+  .dorder .tbl{color:var(--accent);font-weight:700;font-size:14px}
+  .dorder .time{color:var(--td);font-size:12px}
+  .dorder .items{color:var(--t2);font-size:13px}
+  .dorder .items div{padding:2px 0}
+  .dorder .bot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+  .dorder .amt{font-weight:700;font-size:15px;color:var(--t1)}
+  .pill{padding:7px 16px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;color:#fff}
 
   /* Menu */
-  .add-btn { padding: 10px 20px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 16px; }
-  .menu-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: var(--radius); overflow: hidden; }
-  .menu-table th { background: rgba(0,0,0,0.03); color: var(--gray1); font-size: 13px; font-weight: 600; padding: 12px 16px; text-align: left; }
-  .menu-table td { padding: 14px 16px; border-top: 0.5px solid var(--separator); font-size: 14px; color: var(--label2); }
-  .menu-table .emoji { font-size: 28px; }
-  .menu-table .mname { font-weight: 600; color: var(--label); }
-  .tbl-btn { padding: 5px 12px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 4px; }
-
-  /* Tables */
-  .table-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-  .table-card { border-radius: var(--radius); padding: 20px; text-align: center; }
-  .table-card .tnum { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
-  .table-card .tstat { font-size: 12px; font-weight: 700; margin-top: 8px; padding: 4px 14px; border-radius: 20px; display: inline-block; }
-  .table-card .actions { margin-top: 14px; display: flex; gap: 6px; justify-content: center; }
-  .table-card .actions button { padding: 7px 14px; border: none; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
-
-  /* Store */
-  .store-card { border-radius: var(--radius-lg); padding: 32px; max-width: 500px; }
-  .store-row { padding: 12px 0; border-bottom: 0.5px solid var(--separator); display: flex; justify-content: space-between; }
-  .store-row:last-child { border-bottom: none; }
-  .store-row .k { color: var(--gray1); font-size: 14px; }
-  .store-row .v { font-weight: 600; font-size: 14px; }
-  .store-edit { margin-top: 20px; padding: 12px 24px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .form-card{border-radius:16px;padding:16px;margin-bottom:16px;text-align:left}
+  .form-card input,.form-card select,.form-card textarea{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input);color:var(--t1);font-size:14px;width:100%;outline:none}
+  .form-card input:focus,.form-card select:focus,.form-card textarea:focus{border-color:var(--accent)}
+  .form-card textarea{resize:vertical}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .form-card .mb{margin-bottom:10px}
+  .btn-accent{padding:10px 0;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;width:100%;font-weight:700;box-shadow:0 4px 14px rgba(0,122,255,0.3)}
+  .btn-sm{padding:6px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
+  .menu-item{border-radius:16px;padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
 
   /* Theme */
-  .theme-cards { display: flex; gap: 20px; }
-  .theme-card { flex: 1; max-width: 280px; border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; transition: transform 0.2s; }
-  .theme-card:hover { transform: translateY(-2px); }
-  .theme-card.sel { border: 3px solid var(--accent); }
-  .theme-card.unsel { border: 3px solid transparent; }
-  .theme-inner { padding: 16px; }
-  .theme-bar { border-radius: 8px; padding: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-  .theme-flex { display: flex; gap: 6px; }
-  .theme-side { width: 40px; border-radius: 4px; padding: 4px; }
-  .theme-side div { border-radius: 2px; height: 12px; margin-bottom: 4px; }
-  .theme-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-  .theme-grid div { border-radius: 4px; height: 50px; }
-  .theme-label { padding: 12px 16px; text-align: center; font-weight: 700; font-size: 15px; }
+  .theme-cards{display:flex;gap:20px}
+  .tcard{flex:1;max-width:280px;border-radius:20px;overflow:hidden;cursor:pointer;transition:transform 0.2s}
+  .tcard:hover{transform:translateY(-2px)}
+  .tcard.sel{border:3px solid var(--accent)}
+  .tcard.unsel{border:3px solid transparent}
+  .tp{padding:16px}
+  .tbar{border-radius:10px;padding:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+  .tflex{display:flex;gap:6px}
+  .tside{width:40px;border-radius:6px;padding:4px}
+  .tside div{border-radius:3px;height:12px;margin-bottom:4px}
+  .tgrid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .tgrid div{border-radius:6px;height:50px}
+  .tlabel{padding:12px 16px;text-align:center;font-weight:700;font-size:15px}
 </style>
 </head>
 <body>
 
-<nav class="top glass">
-  <span class="logo">t 오더 관리</span>
-  <a class="active" onclick="showTab('dashboard',this)">대시보드</a>
+<nav class="top">
+  <span class="logo">송오더 관리</span>
+  <a class="active" onclick="showTab('dash',this)">대시보드</a>
   <a onclick="showTab('menus',this)">메뉴</a>
   <a onclick="showTab('tables',this)">테이블</a>
   <a onclick="showTab('stores',this)">매장</a>
@@ -125,127 +93,107 @@
 </nav>
 
 <!-- 대시보드 -->
-<div id="tab-dashboard" class="tab-content active">
-  <div class="page-pad">
-    <div class="dash-header">
+<div id="t-dash" class="tab active">
+  <div class="pad">
+    <div class="dash-h">
       <h2>주문 대시보드</h2>
-      <span class="sse" style="color:var(--green)"><span class="sse-dot" style="background:var(--green)"></span> 실시간 연결됨</span>
+      <span class="sse" style="color:var(--green)"><span class="dot" style="background:var(--green)"></span> 실시간 연결됨</span>
     </div>
     <div class="stats">
-      <div class="stat-card glass"><div class="lbl">오늘 주문</div><div class="val">24</div><div class="sub">전일 대비 +8</div></div>
-      <div class="stat-card glass"><div class="lbl">오늘 매출</div><div class="val">487,000원</div><div class="sub">전일 대비 +12%</div></div>
-      <div class="stat-card glass"><div class="lbl">활성 테이블</div><div class="val">6 / 12</div></div>
-      <div class="stat-card glass"><div class="lbl">대기 주문</div><div class="val" style="color:var(--red)">3</div></div>
+      <div class="stat glass"><div class="lbl">오늘 주문</div><div class="val">24</div><div class="sub">전일 대비 +8</div></div>
+      <div class="stat glass"><div class="lbl">오늘 매출</div><div class="val">487,000원</div><div class="sub">전일 대비 +12%</div></div>
+      <div class="stat glass"><div class="lbl">활성 테이블</div><div class="val">6 / 12</div></div>
+      <div class="stat glass"><div class="lbl">대기 주문</div><div class="val" style="color:var(--red)">3</div></div>
     </div>
-    <div class="columns">
+    <div class="cols">
       <div class="col">
         <h3>🔴 대기중 <span class="cnt">3</span></h3>
-        <div class="dash-order glass"><div class="top"><span class="tbl">테이블 5</span><span class="time">1분 전</span></div><div class="items"><div>콜라 × 1</div></div><div class="bottom"><span class="amt">2,000원</span><button class="pill-btn" style="background:var(--orange)">준비시작</button></div></div>
-        <div class="dash-order glass"><div class="top"><span class="tbl">테이블 3</span><span class="time">3분 전</span></div><div class="items"><div>숯불갈비 × 1</div><div>공기밥 × 1</div></div><div class="bottom"><span class="amt">19,000원</span><button class="pill-btn" style="background:var(--orange)">준비시작</button></div></div>
-        <div class="dash-order glass"><div class="top"><span class="tbl">테이블 8</span><span class="time">5분 전</span></div><div class="items"><div>생맥주 × 3</div></div><div class="bottom"><span class="amt">15,000원</span><button class="pill-btn" style="background:var(--orange)">준비시작</button></div></div>
+        <div class="dorder glass"><div class="top"><span class="tbl">테이블 5</span><span class="time">1분 전</span></div><div class="items"><div>콜라 × 1</div></div><div class="bot"><span class="amt">2,000원</span><button class="pill" style="background:var(--orange)">준비시작</button></div></div>
+        <div class="dorder glass"><div class="top"><span class="tbl">테이블 3</span><span class="time">3분 전</span></div><div class="items"><div>숯불갈비 × 1</div><div>공기밥 × 1</div></div><div class="bot"><span class="amt">19,000원</span><button class="pill" style="background:var(--orange)">준비시작</button></div></div>
+        <div class="dorder glass"><div class="top"><span class="tbl">테이블 8</span><span class="time">5분 전</span></div><div class="items"><div>생맥주 × 3</div></div><div class="bot"><span class="amt">15,000원</span><button class="pill" style="background:var(--orange)">준비시작</button></div></div>
       </div>
       <div class="col">
         <h3>🟡 준비중 <span class="cnt">2</span></h3>
-        <div class="dash-order glass"><div class="top"><span class="tbl">테이블 5</span><span class="time">8분 전</span></div><div class="items"><div>된장찌개 × 1</div><div>생맥주 × 2</div></div><div class="bottom"><span class="amt">18,000원</span><button class="pill-btn" style="background:var(--green)">완료</button></div></div>
-        <div class="dash-order glass"><div class="top"><span class="tbl">테이블 1</span><span class="time">12분 전</span></div><div class="items"><div>숯불갈비 × 3</div><div>공기밥 × 3</div></div><div class="bottom"><span class="amt">57,000원</span><button class="pill-btn" style="background:var(--green)">완료</button></div></div>
+        <div class="dorder glass"><div class="top"><span class="tbl">테이블 5</span><span class="time">8분 전</span></div><div class="items"><div>된장찌개 × 1</div><div>생맥주 × 2</div></div><div class="bot"><span class="amt">18,000원</span><button class="pill" style="background:var(--green)">완료</button></div></div>
+        <div class="dorder glass"><div class="top"><span class="tbl">테이블 1</span><span class="time">12분 전</span></div><div class="items"><div>숯불갈비 × 3</div><div>공기밥 × 3</div></div><div class="bot"><span class="amt">57,000원</span><button class="pill" style="background:var(--green)">완료</button></div></div>
       </div>
       <div class="col">
         <h3>🟢 완료 <span class="cnt">2</span></h3>
-        <div class="dash-order glass"><div class="top"><span class="tbl">테이블 5</span><span class="time">20분 전</span></div><div class="items"><div>숯불갈비 × 2</div><div>공기밥 × 2</div></div><div class="bottom"><span class="amt">38,000원</span></div></div>
-        <div class="dash-order glass"><div class="top"><span class="tbl">테이블 2</span><span class="time">35분 전</span></div><div class="items"><div>샐러드 × 1</div><div>콜라 × 2</div></div><div class="bottom"><span class="amt">11,000원</span></div></div>
+        <div class="dorder glass"><div class="top"><span class="tbl">테이블 5</span><span class="time">20분 전</span></div><div class="items"><div>숯불갈비 × 2</div><div>공기밥 × 2</div></div><div class="bot"><span class="amt">38,000원</span></div></div>
+        <div class="dorder glass"><div class="top"><span class="tbl">테이블 2</span><span class="time">35분 전</span></div><div class="items"><div>샐러드 × 1</div><div>콜라 × 2</div></div><div class="bot"><span class="amt">11,000원</span></div></div>
       </div>
     </div>
   </div>
 </div>
 
 <!-- 메뉴 관리 -->
-<div id="tab-menus" class="tab-content">
-  <div class="page-pad">
+<div id="t-menus" class="tab">
+  <div class="pad">
     <h2>메뉴 관리</h2>
-    <button class="add-btn">+ 메뉴 추가</button>
-    <div class="glass" style="border-radius:var(--radius);overflow:hidden">
-      <table class="menu-table">
-        <thead><tr><th></th><th>메뉴명</th><th>카테고리</th><th>가격</th><th>상태</th><th>관리</th></tr></thead>
-        <tbody>
-          <tr><td class="emoji">🥩</td><td class="mname">숯불갈비</td><td>메인</td><td>18,000원</td><td style="color:var(--green);font-weight:600">판매중</td><td><button class="tbl-btn" style="background:var(--gray5);color:var(--label2)">수정</button><button class="tbl-btn" style="background:rgba(255,59,48,0.12);color:var(--red)">삭제</button></td></tr>
-          <tr><td class="emoji">🥘</td><td class="mname">된장찌개</td><td>메인</td><td>8,000원</td><td style="color:var(--green);font-weight:600">판매중</td><td><button class="tbl-btn" style="background:var(--gray5);color:var(--label2)">수정</button><button class="tbl-btn" style="background:rgba(255,59,48,0.12);color:var(--red)">삭제</button></td></tr>
-          <tr><td class="emoji">🍚</td><td class="mname">공기밥</td><td>사이드</td><td>1,000원</td><td style="color:var(--green);font-weight:600">판매중</td><td><button class="tbl-btn" style="background:var(--gray5);color:var(--label2)">수정</button><button class="tbl-btn" style="background:rgba(255,59,48,0.12);color:var(--red)">삭제</button></td></tr>
-          <tr><td class="emoji">🥗</td><td class="mname">샐러드</td><td>사이드</td><td>7,000원</td><td style="color:var(--green);font-weight:600">판매중</td><td><button class="tbl-btn" style="background:var(--gray5);color:var(--label2)">수정</button><button class="tbl-btn" style="background:rgba(255,59,48,0.12);color:var(--red)">삭제</button></td></tr>
-          <tr><td class="emoji">🍺</td><td class="mname">생맥주</td><td>음료</td><td>5,000원</td><td style="color:var(--green);font-weight:600">판매중</td><td><button class="tbl-btn" style="background:var(--gray5);color:var(--label2)">수정</button><button class="tbl-btn" style="background:rgba(255,59,48,0.12);color:var(--red)">삭제</button></td></tr>
-          <tr><td class="emoji">🍖</td><td class="mname" style="color:var(--red)">양념치킨</td><td>메인</td><td>17,000원</td><td style="color:var(--red);font-weight:600">품절</td><td><button class="tbl-btn" style="background:var(--gray5);color:var(--label2)">수정</button><button class="tbl-btn" style="background:rgba(255,59,48,0.12);color:var(--red)">삭제</button></td></tr>
-        </tbody>
-      </table>
+    <div class="form-card glass" style="display:flex;gap:8px;align-items:center">
+      <input placeholder="새 카테고리명" style="flex:1">
+      <button style="padding:10px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;white-space:nowrap;cursor:pointer;font-weight:700">추가</button>
     </div>
+    <div class="form-card glass">
+      <div class="form-row"><input placeholder="메뉴명"><input placeholder="가격" type="number"></div>
+      <select class="mb"><option>카테고리 선택</option><option>메인</option><option>사이드</option><option>음료</option></select>
+      <textarea placeholder="메뉴 설명 (선택사항)" rows="2" class="mb"></textarea>
+      <input type="file" accept="image/*" style="font-size:14px;color:var(--t2);margin-bottom:10px">
+      <button class="btn-accent">등록</button>
+    </div>
+    <div class="menu-item glass"><div><div style="color:var(--t1);font-weight:600">숯불갈비 <span style="color:var(--tm);font-size:13px;font-weight:normal">(메인)</span></div><div style="color:var(--t2);font-size:14px">18,000원</div><div style="color:var(--tm);font-size:12px;margin-top:2px">양념 숯불갈비 1인분</div></div><div style="display:flex;gap:6px"><button class="btn-sm" style="background:var(--btn2);color:var(--btn2t)">수정</button><button class="btn-sm" style="background:rgba(255,69,58,0.12);color:var(--red)">삭제</button></div></div>
+    <div class="menu-item glass"><div><div style="color:var(--t1);font-weight:600">된장찌개 <span style="color:var(--tm);font-size:13px;font-weight:normal">(메인)</span></div><div style="color:var(--t2);font-size:14px">8,000원</div><div style="color:var(--tm);font-size:12px;margin-top:2px">전통 된장찌개</div></div><div style="display:flex;gap:6px"><button class="btn-sm" style="background:var(--btn2);color:var(--btn2t)">수정</button><button class="btn-sm" style="background:rgba(255,69,58,0.12);color:var(--red)">삭제</button></div></div>
+    <div class="menu-item glass"><div><div style="color:var(--t1);font-weight:600">공기밥 <span style="color:var(--tm);font-size:13px;font-weight:normal">(사이드)</span></div><div style="color:var(--t2);font-size:14px">1,000원</div></div><div style="display:flex;gap:6px"><button class="btn-sm" style="background:var(--btn2);color:var(--btn2t)">수정</button><button class="btn-sm" style="background:rgba(255,69,58,0.12);color:var(--red)">삭제</button></div></div>
+    <div class="menu-item glass"><div><div style="color:var(--t1);font-weight:600">생맥주 <span style="color:var(--tm);font-size:13px;font-weight:normal">(음료)</span></div><div style="color:var(--t2);font-size:14px">5,000원</div><div style="color:var(--tm);font-size:12px;margin-top:2px">500ml</div></div><div style="display:flex;gap:6px"><button class="btn-sm" style="background:var(--btn2);color:var(--btn2t)">수정</button><button class="btn-sm" style="background:rgba(255,69,58,0.12);color:var(--red)">삭제</button></div></div>
   </div>
 </div>
 
 <!-- 테이블 관리 -->
-<div id="tab-tables" class="tab-content">
-  <div class="page-pad">
-    <h2>테이블 관리</h2>
-    <button class="add-btn" style="margin-bottom:16px">+ 테이블 추가</button>
-    <div class="table-grid">
-      <div class="table-card glass"><div class="tnum">1</div><div class="tstat" style="background:rgba(52,199,89,0.15);color:var(--green)">이용중</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">주문보기</button><button style="background:var(--accent);color:#fff">이용완료</button></div></div>
-      <div class="table-card glass"><div class="tnum">2</div><div class="tstat" style="background:rgba(52,199,89,0.15);color:var(--green)">이용중</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">주문보기</button><button style="background:var(--accent);color:#fff">이용완료</button></div></div>
-      <div class="table-card glass"><div class="tnum">3</div><div class="tstat" style="background:rgba(52,199,89,0.15);color:var(--green)">이용중</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">주문보기</button><button style="background:var(--accent);color:#fff">이용완료</button></div></div>
-      <div class="table-card glass"><div class="tnum">4</div><div class="tstat" style="background:var(--gray5);color:var(--gray1)">비어있음</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">과거내역</button></div></div>
-      <div class="table-card glass"><div class="tnum">5</div><div class="tstat" style="background:rgba(52,199,89,0.15);color:var(--green)">이용중</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">주문보기</button><button style="background:var(--accent);color:#fff">이용완료</button></div></div>
-      <div class="table-card glass"><div class="tnum">6</div><div class="tstat" style="background:rgba(52,199,89,0.15);color:var(--green)">이용중</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">주문보기</button><button style="background:var(--accent);color:#fff">이용완료</button></div></div>
-      <div class="table-card glass"><div class="tnum">7</div><div class="tstat" style="background:var(--gray5);color:var(--gray1)">비어있음</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">과거내역</button></div></div>
-      <div class="table-card glass"><div class="tnum">8</div><div class="tstat" style="background:rgba(52,199,89,0.15);color:var(--green)">이용중</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">주문보기</button><button style="background:var(--accent);color:#fff">이용완료</button></div></div>
-      <div class="table-card glass"><div class="tnum">9</div><div class="tstat" style="background:var(--gray5);color:var(--gray1)">비어있음</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">과거내역</button></div></div>
-      <div class="table-card glass"><div class="tnum">10</div><div class="tstat" style="background:var(--gray5);color:var(--gray1)">비어있음</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">과거내역</button></div></div>
-      <div class="table-card glass"><div class="tnum">11</div><div class="tstat" style="background:var(--gray5);color:var(--gray1)">비어있음</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">과거내역</button></div></div>
-      <div class="table-card glass"><div class="tnum">12</div><div class="tstat" style="background:var(--gray5);color:var(--gray1)">비어있음</div><div class="actions"><button style="background:var(--gray5);color:var(--label2)">과거내역</button></div></div>
-    </div>
-  </div>
+<div id="t-tables" class="tab">
+  <div class="pad"><h2>테이블 관리</h2><div class="ph-card glass">테이블 설정, 주문 삭제, 이용 완료, 과거 내역</div></div>
 </div>
 
 <!-- 매장 관리 -->
-<div id="tab-stores" class="tab-content">
-  <div class="page-pad">
+<div id="t-stores" class="tab">
+  <div class="pad">
     <h2>매장 관리</h2>
-    <div class="store-card glass">
-      <div class="store-row"><span class="k">매장명</span><span class="v">맛있는 고깃집</span></div>
-      <div class="store-row"><span class="k">식별자</span><span class="v">tasty-meat</span></div>
-      <div class="store-row"><span class="k">주소</span><span class="v">서울시 강남구</span></div>
-      <div class="store-row"><span class="k">전화</span><span class="v">02-1234-5678</span></div>
-      <button class="store-edit">매장 정보 수정</button>
+    <div class="form-card glass">
+      <div class="form-row"><input placeholder="매장명"><input placeholder="매장 식별자 (영문)"></div>
+      <input class="mb" placeholder="주소 (선택)">
+      <input class="mb" placeholder="전화번호 (선택)">
+      <button class="btn-accent">매장 등록</button>
     </div>
+    <div class="menu-item glass"><div><div style="color:var(--t1);font-weight:600">맛있는 고깃집 <span style="color:var(--tm);font-size:13px;font-weight:normal">(tasty-meat)</span></div><div style="color:var(--t2);font-size:13px;margin-top:4px">📍 서울시 강남구</div><div style="color:var(--t2);font-size:13px">📞 02-1234-5678</div></div></div>
+    <div class="menu-item glass"><div><div style="color:var(--t1);font-weight:600">송오더 본점 <span style="color:var(--tm);font-size:13px;font-weight:normal">(song-order)</span></div><div style="color:var(--t2);font-size:13px;margin-top:4px">📍 서울시 마포구</div><div style="color:var(--t2);font-size:13px">📞 02-9876-5432</div></div></div>
   </div>
 </div>
 
 <!-- 테마 설정 -->
-<div id="tab-theme" class="tab-content">
-  <div class="page-pad">
-    <h2>테마 설정</h2>
+<div id="t-theme" class="tab">
+  <div class="pad">
+    <h2 style="margin-bottom:20px">테마 설정</h2>
     <div class="theme-cards">
-      <div class="theme-card unsel" style="background:#1a1a1a">
-        <div class="theme-inner">
-          <div class="theme-bar" style="background:#111"><span style="color:#e53935;font-weight:bold;font-size:14px">t 오더</span><div style="background:#e53935;color:#fff;border-radius:4px;padding:2px 6px;font-size:10px">12</div></div>
-          <div class="theme-flex"><div class="theme-side" style="background:#2a2a2a"><div style="background:#e53935"></div><div style="background:#333"></div><div style="background:#333"></div></div><div class="theme-grid"><div style="background:#2a2a2a"></div><div style="background:#2a2a2a"></div><div style="background:#2a2a2a"></div><div style="background:#2a2a2a"></div></div></div>
+      <div class="tcard sel" style="background:#0a0a0c">
+        <div class="tp">
+          <div class="tbar" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1)"><span style="color:#0a84ff;font-weight:700;font-size:14px">송오더</span><div style="background:#0a84ff;color:#fff;border-radius:6px;padding:2px 6px;font-size:10px;font-weight:700">12</div></div>
+          <div class="tflex"><div class="tside" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1)"><div style="background:#0a84ff"></div><div style="background:rgba(255,255,255,0.1)"></div><div style="background:rgba(255,255,255,0.1)"></div></div><div class="tgrid"><div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1)"></div><div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1)"></div><div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1)"></div><div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1)"></div></div></div>
         </div>
-        <div class="theme-label" style="background:#333;color:#ccc">다크 모드</div>
+        <div class="tlabel" style="background:#0a84ff;color:#fff">✓ 다크 모드</div>
       </div>
-      <div class="theme-card sel" style="background:#f5f5f5">
-        <div class="theme-inner">
-          <div class="theme-bar" style="background:#fff;border:1px solid #e0e0e0"><span style="color:#007aff;font-weight:bold;font-size:14px">t 오더</span><div style="background:#007aff;color:#fff;border-radius:4px;padding:2px 6px;font-size:10px">12</div></div>
-          <div class="theme-flex"><div class="theme-side" style="background:#fff;border:1px solid #e0e0e0"><div style="background:#007aff"></div><div style="background:#e0e0e0"></div><div style="background:#e0e0e0"></div></div><div class="theme-grid"><div style="background:#fff;border:1px solid #e0e0e0"></div><div style="background:#fff;border:1px solid #e0e0e0"></div><div style="background:#fff;border:1px solid #e0e0e0"></div><div style="background:#fff;border:1px solid #e0e0e0"></div></div></div>
+      <div class="tcard unsel" style="background:#f2f2f7">
+        <div class="tp">
+          <div class="tbar" style="background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.06)"><span style="color:#007aff;font-weight:700;font-size:14px">송오더</span><div style="background:#007aff;color:#fff;border-radius:6px;padding:2px 6px;font-size:10px;font-weight:700">12</div></div>
+          <div class="tflex"><div class="tside" style="background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.06)"><div style="background:#007aff"></div><div style="background:rgba(0,0,0,0.06)"></div><div style="background:rgba(0,0,0,0.06)"></div></div><div class="tgrid"><div style="background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.06)"></div><div style="background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.06)"></div><div style="background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.06)"></div><div style="background:rgba(255,255,255,0.6);border:1px solid rgba(0,0,0,0.06)"></div></div></div>
         </div>
-        <div class="theme-label" style="background:var(--accent);color:#fff">✓ 라이트 모드</div>
+        <div class="tlabel" style="background:rgba(0,0,0,0.05);color:rgba(0,0,0,0.6)">라이트 모드</div>
       </div>
     </div>
-    <p style="color:var(--gray1);margin-top:16px;font-size:14px">선택한 테마는 고객 화면과 관리자 화면 모두에 적용됩니다.</p>
+    <p style="color:var(--tm);margin-top:16px;font-size:14px">선택한 테마는 매장의 모든 테이블 고객 화면에 동일하게 적용됩니다.</p>
   </div>
 </div>
 
 <script>
-function showTab(name, el) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('nav.top a').forEach(a => a.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  el.classList.add('active');
-}
+function showTab(n,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('nav.top a').forEach(a=>a.classList.remove('active'));document.getElementById('t-'+n).classList.add('active');el.classList.add('active')}
 </script>
 </body>
 </html>
