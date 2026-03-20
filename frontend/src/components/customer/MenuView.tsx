@@ -10,6 +10,7 @@ export function MenuView({ cart, onAddToCart }: Props) {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [activeDescId, setActiveDescId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth.storeId) return;
@@ -37,14 +38,15 @@ export function MenuView({ cart, onAddToCart }: Props) {
             <div key={menu.id} onClick={() => !menu.is_sold_out && onAddToCart(menu)} style={{ background: 'var(--bg-card)', borderRadius: 12, overflow: 'hidden', cursor: menu.is_sold_out ? 'default' : 'pointer', position: 'relative', transition: 'transform 0.15s', border: '1px solid var(--border)' }}
               onMouseEnter={e => { if (!menu.is_sold_out) (e.currentTarget as HTMLElement).style.transform = 'scale(1.03)'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}>
-              <div style={{ position: 'relative', width: '100%', paddingTop: '75%', background: 'var(--bg-input)' }}>
+              <div style={{ position: 'relative', width: '100%', paddingTop: '75%', background: 'var(--bg-input)' }}
+                onClick={e => { if (menu.description) { e.stopPropagation(); setActiveDescId(prev => prev === menu.id ? null : menu.id); } }}>
                 {menu.image_url ? <img src={menu.image_url} alt={menu.name} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 40 }}>🍽️</div>}
                 {menu.is_sold_out && <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ color: 'var(--accent)', fontSize: 24, fontWeight: 'bold', border: '3px solid var(--accent)', padding: '4px 16px', borderRadius: 4, transform: 'rotate(-15deg)' }}>SOLD OUT</span></div>}
-                {cart.find(i => i.menuId === menu.id) && <div style={{ position: 'absolute', top: 8, right: 8, background: 'var(--accent)', color: '#fff', borderRadius: '50%', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 'bold' }}>{cart.find(i => i.menuId === menu.id)!.quantity}</div>}
+                {activeDescId === menu.id && menu.description && <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12 }}><p style={{ color: '#fff', fontSize: 13, lineHeight: 1.5, textAlign: 'center', margin: 0, wordBreak: 'keep-all' }}>{menu.description}</p></div>}
+                {cart.find(i => i.menuId === menu.id) && <div style={{ position: 'absolute', top: 8, right: 8, background: 'var(--accent)', color: '#fff', borderRadius: '50%', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 'bold', zIndex: 1 }}>{cart.find(i => i.menuId === menu.id)!.quantity}</div>}
               </div>
               <div style={{ padding: '10px 12px 14px' }}>
                 <div style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 'bold', marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{menu.name}</div>
-                {menu.description && <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 4 }}>{menu.description}</div>}
                 <div style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 'bold' }}>{menu.price.toLocaleString()}원</div>
               </div>
             </div>

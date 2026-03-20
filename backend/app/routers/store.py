@@ -28,7 +28,7 @@ async def update_store(store_id: UUID, req: StoreUpdate, svc: StoreService = Dep
     return await svc.update_store(store_id, req.model_dump(exclude_unset=True))
 
 
-@router.get("/api/stores/{store_slug}/theme")
-async def get_store_theme(store_slug: str, svc: StoreService = Depends(get_store_service)):
+@router.get("/api/stores/{store_slug}/info")
+async def get_store_info(store_slug: str, svc: StoreService = Depends(get_store_service)):
     store = await svc.get_store_by_slug(store_slug)
-    return {"theme": store.theme}
+    return {"name": store.name, "theme": store.theme}

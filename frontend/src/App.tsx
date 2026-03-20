@@ -14,6 +14,7 @@ import { CartItem, Menu } from './types';
 
 function CustomerNav({ cartCount }: { cartCount: number }) {
   const { auth } = useAuth();
+  const { storeName } = useTheme();
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
@@ -26,7 +27,7 @@ function CustomerNav({ cartCount }: { cartCount: number }) {
   return (
     <>
       <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-header)', padding: '0 16px', height: 56, borderBottom: '1px solid var(--border)' }}>
-        <span style={{ color: 'var(--accent)', fontSize: 24, fontWeight: 'bold' }}>t 오더</span>
+        <span style={{ color: 'var(--accent)', fontSize: 22, fontWeight: 'bold' }}>{storeName || 't 오더'}</span>
         {auth.tableId && (
           <div style={{ background: 'var(--accent)', color: '#fff', borderRadius: 8, padding: '4px 12px', textAlign: 'center' }}>
             <div style={{ fontSize: 10, lineHeight: 1 }}>테이블번호</div>
@@ -49,15 +50,15 @@ function CustomerNav({ cartCount }: { cartCount: number }) {
 
 function CustomerLayout() {
   const { auth } = useAuth();
-  const { loadStoreTheme } = useTheme();
+  const { loadStoreInfo } = useTheme();
   const [cart, setCart] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem('cart');
     return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
-    if (auth.storeId) loadStoreTheme(auth.storeId);
-  }, [auth.storeId, loadStoreTheme]);
+    if (auth.storeId) loadStoreInfo(auth.storeId);
+  }, [auth.storeId, loadStoreInfo]);
 
   const saveCart = (items: CartItem[]) => { setCart(items); localStorage.setItem('cart', JSON.stringify(items)); };
 
@@ -94,11 +95,11 @@ function CustomerLayout() {
 
 function AdminLayout() {
   const { auth, logout } = useAuth();
-  const { loadStoreTheme } = useTheme();
+  const { loadStoreInfo } = useTheme();
 
   useEffect(() => {
-    if (auth.storeId) loadStoreTheme(auth.storeId);
-  }, [auth.storeId, loadStoreTheme]);
+    if (auth.storeId) loadStoreInfo(auth.storeId);
+  }, [auth.storeId, loadStoreInfo]);
 
   if (!auth.isAuthenticated || auth.role !== 'admin') return <AdminLogin />;
 

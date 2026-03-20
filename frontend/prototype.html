@@ -98,7 +98,7 @@
 <body>
 <div class="header">
   <div style="display:flex;align-items:center;gap:16px">
-    <div class="logo">t 오더</div>
+    <div class="logo">누룽지통닭 강남점</div>
   </div>
   <div class="table-badge"><div class="label">테이블번호</div><div class="number">12</div></div>
 </div>
@@ -142,28 +142,21 @@
 <script>
 const categories=[{id:'c1',name:'안주'},{id:'c2',name:'주류'},{id:'c3',name:'음료'},{id:'c4',name:'추가메뉴'},{id:'c5',name:'포장할인'}];
 const menus=[
-  {id:'m1',name:'마늘쫑닭(반마리)',price:7900,category_id:'c1',is_sold_out:false,badge:'rec'},
-  {id:'m2',name:'치즈닭(반마리)',price:7900,category_id:'c1',is_sold_out:false,badge:'hit,best'},
-  {id:'m3',name:'파품닭(반마리)',price:7900,category_id:'c1',is_sold_out:true,badge:''},
-  {id:'m4',name:'누룽지통닭',price:18900,category_id:'c1',is_sold_out:false,badge:''},
-  {id:'m5',name:'양념치킨',price:19900,category_id:'c1',is_sold_out:false,badge:'best'},
-  {id:'m6',name:'간장치킨',price:19900,category_id:'c1',is_sold_out:false,badge:''},
-  {id:'m7',name:'생맥주 500ml',price:5000,category_id:'c2',is_sold_out:false,badge:'hit'},
-  {id:'m8',name:'소주',price:5000,category_id:'c2',is_sold_out:false,badge:''},
-  {id:'m9',name:'콜라',price:2000,category_id:'c3',is_sold_out:false,badge:''},
-  {id:'m10',name:'사이다',price:2000,category_id:'c3',is_sold_out:false,badge:''},
+  {id:'m1',name:'마늘쫑닭(반마리)',price:7900,category_id:'c1',is_sold_out:false,badge:'rec',img:'https://images.unsplash.com/photo-1527477396000-e27163b4bbed?w=400&h=300&fit=crop'},
+  {id:'m2',name:'치즈닭(반마리)',price:7900,category_id:'c1',is_sold_out:false,badge:'hit,best',img:'https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=400&h=300&fit=crop'},
+  {id:'m3',name:'파품닭(반마리)',price:7900,category_id:'c1',is_sold_out:true,badge:'',img:'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=400&h=300&fit=crop'},
+  {id:'m4',name:'누룽지통닭',price:18900,category_id:'c1',is_sold_out:false,badge:'',img:'https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=400&h=300&fit=crop'},
+  {id:'m5',name:'양념치킨',price:19900,category_id:'c1',is_sold_out:false,badge:'best',img:'https://images.unsplash.com/photo-1575932444877-5106bee2a599?w=400&h=300&fit=crop'},
+  {id:'m6',name:'간장치킨',price:19900,category_id:'c1',is_sold_out:false,badge:'',img:'https://images.unsplash.com/photo-1569058242567-93de6f36f8e6?w=400&h=300&fit=crop'},
+  {id:'m7',name:'생맥주 500ml',price:5000,category_id:'c2',is_sold_out:false,badge:'hit',img:'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=300&fit=crop'},
+  {id:'m8',name:'소주',price:5000,category_id:'c2',is_sold_out:false,badge:'',img:'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400&h=300&fit=crop'},
+  {id:'m9',name:'콜라',price:2000,category_id:'c3',is_sold_out:false,badge:'',img:'https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=300&fit=crop'},
+  {id:'m10',name:'사이다',price:2000,category_id:'c3',is_sold_out:false,badge:'',img:'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&h=300&fit=crop'},
+  {id:'m11',name:'감자튀김',price:6000,category_id:'c4',is_sold_out:false,badge:'rec',img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&h=300&fit=crop'},
+  {id:'m12',name:'떡볶이',price:7000,category_id:'c4',is_sold_out:false,badge:'',img:'https://images.unsplash.com/photo-1635963662853-f0ef2c3b4547?w=400&h=300&fit=crop'},
 ];
 const emojis=['🍗','🍖','🍕','🥘','🍜','🍛','🍺','🍶','🥤','🧃'];
 let cart={m1:2,m5:1},activeCat=null;
-
-function setTheme(t){
-  if(t==='light')document.documentElement.classList.add('light');
-  else document.documentElement.classList.remove('light');
-  document.getElementById('btn-dark').className=t==='dark'?'active':'';
-  document.getElementById('btn-light').className=t==='light'?'active':'';
-  localStorage.setItem('theme',t);
-}
-(function(){var t=localStorage.getItem('theme');if(t)setTheme(t);})();
 
 function renderSidebar(){
   const sb=document.getElementById('sidebar');
@@ -178,7 +171,8 @@ function renderMenus(){
   document.getElementById('menu-grid').innerHTML=f.map((m,i)=>{
     const badges=m.badge?m.badge.split(',').map(b=>b==='rec'?'<span class="badge-rec">👍 추천</span>':b==='hit'?'<span class="badge-hit">★ HIT</span>':b==='best'?'<span class="badge-best">🔥 BEST</span>':'').join(''):'';
     const cq=cart[m.id]||0;
-    return `<div class="menu-card ${m.is_sold_out?'soldout':''}" onclick="${m.is_sold_out?'':`addToCart('${m.id}')`}"><div class="menu-img"><div class="placeholder">${emojis[i%emojis.length]}</div>${m.is_sold_out?'<div class="soldout-overlay"><span>SOLD OUT</span></div>':''}${cq?`<div class="cart-badge">${cq}</div>`:''}${badges?`<div class="menu-badge">${badges}</div>`:''}</div><div class="menu-info"><div class="menu-name">${m.name}</div><div class="menu-price">${m.price.toLocaleString()}원</div></div></div>`;
+    const imgHtml=m.img?`<img src="${m.img}" alt="${m.name}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">`:`<div class="placeholder">${emojis[i%emojis.length]}</div>`;
+    return `<div class="menu-card ${m.is_sold_out?'soldout':''}" onclick="${m.is_sold_out?'':`addToCart('${m.id}')`}"><div class="menu-img">${imgHtml}${m.is_sold_out?'<div class="soldout-overlay"><span>SOLD OUT</span></div>':''}${cq?`<div class="cart-badge">${cq}</div>`:''}${badges?`<div class="menu-badge">${badges}</div>`:''}</div><div class="menu-info"><div class="menu-name">${m.name}</div><div class="menu-price">${m.price.toLocaleString()}원</div></div></div>`;
   }).join('');
 }
 function renderCart(){

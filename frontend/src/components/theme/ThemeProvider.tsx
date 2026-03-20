@@ -3,8 +3,8 @@ import { storeApi } from '../../services/api';
 
 type Theme = 'dark' | 'light';
 
-const ThemeContext = createContext<{ theme: Theme; setTheme: (t: Theme) => void; loadStoreTheme: (slug: string) => void }>({
-  theme: 'dark', setTheme: () => {}, loadStoreTheme: () => {},
+const ThemeContext = createContext<{ theme: Theme; storeName: string; setTheme: (t: Theme) => void; loadStoreInfo: (slug: string) => void }>({
+  theme: 'dark', storeName: '', setTheme: () => {}, loadStoreInfo: () => {},
 });
 
 export const useTheme = () => useContext(ThemeContext);
@@ -33,17 +33,21 @@ function applyVars(vars: Record<string, string>) {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
+  const [storeName, setStoreName] = useState('');
 
   const applyTheme = useCallback((t: Theme) => {
     setThemeState(t);
     applyVars(t === 'dark' ? darkVars : lightVars);
   }, []);
 
-  const loadStoreTheme = useCallback((slug: string) => {
-    storeApi.getTheme(slug).then(res => applyTheme(res.theme as Theme)).catch(() => {});
+  const loadStoreInfo = useCallback((slug: string) => {
+    storeApi.getTheme(slug).then(res => {
+      applyTheme(res.theme as Theme);
+      setStoreName(res.name);
+    }).catch(() => {});
   }, [applyTheme]);
 
   useEffect(() => { applyVars(darkVars); }, []);
 
-  return <ThemeContext.Provider value={{ theme, setTheme: applyTheme, loadStoreTheme }}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ theme, storeName, setTheme: applyTheme, loadStoreInfo }}>{children}</ThemeContext.Provider>;
 }

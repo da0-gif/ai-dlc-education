@@ -1,10 +1,96 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../auth/AuthProvider';
+import { menuApi, categoryApi } from '../../services/api';
+import { Menu, Category } from '../../types';
 
 const pageStyle: React.CSSProperties = { padding: 24 };
 const cardStyle: React.CSSProperties = { background: 'var(--bg-card)', borderRadius: 12, padding: 32, textAlign: 'center', color: 'var(--text-muted)', border: '1px solid var(--border)' };
 
 export function MenuManager() {
-  return <div style={pageStyle}><h2 style={{ color: 'var(--text-primary)', marginBottom: 16 }}>메뉴 관리</h2><div style={cardStyle}>메뉴 CRUD 및 카테고리 관리</div></div>;
+  const { auth } = useAuth();
+  const [menus, setMenus] = useState<Menu[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [form, setForm] = useState({ name: '', price: '', description: '', category_id: '' });
+  const [image, setImage] = useState<File | null>(null);
+  const [newCat, setNewCat] = useState('');
+
+  const storeId = auth.storeId!;
+  const load = useCallback(async () => {
+    const [m, c] = await Promise.all([menuApi.list(storeId), categoryApi.list(storeId)]);
+    setMenus(m as Menu[]); setCategories(c as Category[]);
+  }, [storeId]);
+  useEffect(() => { load(); }, [load]);
+
+  const resetForm = () => { setForm({ name: '', price: '', description: '', category_id: '' }); setImage(null); setEditId(null); };
+
+  const handleSubmit = async () => {
+    const fd = new FormData();
+    fd.append('name', form.name); fd.append('price', form.price);
+    if (form.category_id) fd.append('category_id', form.category_id);
+    if (form.description) fd.append('description', form.description);
+    if (image) fd.append('image', image);
+    if (editId) { await menuApi.update(storeId, editId, fd); }
+    else { await menuApi.create(storeId, fd); }
+    resetForm(); load();
+  };
+
+  const startEdit = (m: Menu) => {
+    setEditId(m.id);
+    setForm({ name: m.name, price: String(m.price), description: m.description || '', category_id: m.category_id });
+  };
+
+  const addCategory = async () => { if (!newCat.trim()) return; await categoryApi.create(storeId, newCat.trim()); setNewCat(''); load(); };
+
+  const inputStyle: React.CSSProperties = { padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: 14, width: '100%' };
+
+  return (
+    <div style={pageStyle}>
+      <h2 style={{ color: 'var(--text-primary)', marginBottom: 16 }}>메뉴 관리</h2>
+
+      {/* Category */}
+      <div style={{ ...cardStyle, textAlign: 'left', marginBottom: 16, display: 'flex', gap: 8, alignItems: 'center', padding: 16 }}>
+        <input value={newCat} onChange={e => setNewCat(e.target.value)} placeholder="새 카테고리명" style={{ ...inputStyle, flex: 1 }} />
+        <button onClick={addCategory} style={{ padding: '8px 16px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', whiteSpace: 'nowrap' }}>추가</button>
+      </div>
+
+      {/* Menu Form */}
+      <div style={{ ...cardStyle, textAlign: 'left', marginBottom: 16, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="메뉴명" style={inputStyle} />
+          <input value={form.price} onChange={e => setForm(p => ({ ...p, price: e.target.value }))} placeholder="가격" type="number" style={inputStyle} />
+        </div>
+        <select value={form.category_id} onChange={e => setForm(p => ({ ...p, category_id: e.target.value }))} style={inputStyle}>
+          <option value="">카테고리 선택</option>
+          {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="메뉴 설명 (선택사항)" rows={2} style={{ ...inputStyle, resize: 'vertical' }} />
+        <input type="file" accept="image/*" onChange={e => setImage(e.target.files?.[0] || null)} style={{ fontSize: 14, color: 'var(--text-secondary)' }} />
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={handleSubmit} disabled={!form.name || !form.price || (!editId && !form.category_id)} style={{ flex: 1, padding: '10px 0', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 15 }}>{editId ? '수정' : '등록'}</button>
+          {editId && <button onClick={resetForm} style={{ padding: '10px 16px', background: 'var(--btn-secondary)', color: 'var(--btn-secondary-text)', border: 'none', borderRadius: 6, cursor: 'pointer' }}>취소</button>}
+        </div>
+      </div>
+
+      {/* Menu List */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {menus.map(m => (
+          <div key={m.id} style={{ ...cardStyle, textAlign: 'left', padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>{m.name} <span style={{ fontWeight: 'normal', color: 'var(--text-muted)', fontSize: 13 }}>({categories.find(c => c.id === m.category_id)?.name})</span></div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{m.price.toLocaleString()}원</div>
+              {m.description && <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 2 }}>{m.description}</div>}
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button onClick={() => startEdit(m)} style={{ padding: '6px 12px', background: 'var(--btn-secondary)', color: 'var(--btn-secondary-text)', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13 }}>수정</button>
+              <button onClick={async () => { await menuApi.delete(storeId, m.id); load(); }} style={{ padding: '6px 12px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13 }}>삭제</button>
+            </div>
+          </div>
+        ))}
+        {menus.length === 0 && <div style={cardStyle}>등록된 메뉴가 없습니다.</div>}
+      </div>
+    </div>
+  );
 }
 
 export function TableManager() {

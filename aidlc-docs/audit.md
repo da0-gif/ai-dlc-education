@@ -196,3 +196,13 @@
 **Context**: Build and Test stage complete. CONSTRUCTION phase 완료.
 
 ---
+
+## Feature Enhancement - 메뉴 설명 딤 오버레이 & 관리자 입력
+**Timestamp**: 2026-03-20T14:46:34+09:00
+**User Input**: "사용자 화면에서 메뉴를 터치 할 경우 이미지 영역에 딤처리 되고 메뉴를 설명하는 텍스트가 노출되었으면좋겠어. 메뉴에 대한 설명은 가맹주 어드민 페이지에서 입력 및 관리되도록해줘. 메뉴 설명은 필수 값은 아니고 선택값이야."
+**AI Response**: 백엔드 Menu 모델에 description 필드 이미 존재 확인. 프론트엔드 2개 파일 수정:
+1. `MenuView.tsx` - 이미지 영역 터치 시 딤(rgba(0,0,0,0.7)) 오버레이 + description 텍스트 표시, 토글 방식
+2. `AdminManagement.tsx` - MenuManager placeholder를 실제 CRUD 구현으로 교체, description textarea 포함 (선택값)
+**Context**: Post-construction feature enhancement, no backend changes needed
+
+---
